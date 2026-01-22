@@ -121,9 +121,11 @@ jobs:
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ needs.create-release.outputs.version }}
           files: |
             csv2json-${{ matrix.suffix }}
             csv2json-${{ matrix.suffix }}.sha256
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
