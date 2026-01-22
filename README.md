@@ -161,6 +161,9 @@ cp .env.example .env
 ### Running the Service
 
 ```bash
+# Check version
+./csv2json -version
+
 # Using environment variables from .env file
 ./csv2json
 

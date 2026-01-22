@@ -1,12 +1,18 @@
 .PHONY: build run clean test lint docker-build docker-run
 
+# Version information
+VERSION := $(shell cat VERSION)
+GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+LDFLAGS := -X csv2json/internal/version.GitCommit=$(GIT_COMMIT) -X csv2json/internal/version.BuildDate=$(BUILD_DATE)
+
 # Build binary
 build:
-	go build -o csv2json ./cmd/csv2json
+	go build -ldflags="$(LDFLAGS)" -o csv2json ./cmd/csv2json
 
 # Build with optimization
 build-release:
-	CGO_ENABLED=0 go build -ldflags="-w -s" -o csv2json ./cmd/csv2json
+	CGO_ENABLED=0 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json ./cmd/csv2json
 
 # Run the application
 run:
@@ -53,7 +59,10 @@ logs:
 
 # Cross-compile for multiple platforms
 build-all:
-	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o csv2json-linux-amd64 ./cmd/csv2json
-	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s" -o csv2json-windows-amd64.exe ./cmd/csv2json
-	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s" -o csv2json-darwin-amd64 ./cmd/csv2json
-	GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s" -o csv2json-darwin-arm64 ./cmd/csv2json
+	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-linux-amd64 ./cmd/csv2json
+	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-windows-amd64.exe ./cmd/csv2json
+	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-darwin-amd64 ./cmd/csv2json
+	GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-darwin-arm64 ./cmd/csv2json
+
+# Cross-compile target (alias)
+cross-compile: build-all

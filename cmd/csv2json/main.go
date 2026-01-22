@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -10,9 +12,20 @@ import (
 
 	"csv2json/internal/config"
 	"csv2json/internal/processor"
+	"csv2json/internal/version"
 )
 
 func main() {
+	// Parse command-line flags
+	versionFlag := flag.Bool("version", false, "Display version information")
+	flag.Parse()
+
+	// Handle version flag
+	if *versionFlag {
+		fmt.Println(version.GetFullVersionInfo())
+		os.Exit(0)
+	}
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -48,6 +61,7 @@ func main() {
 
 	// Log startup configuration
 	log.Println("========================================")
+	log.Printf("%s", version.GetFullVersionInfo())
 	log.Println("csv2json service starting with configuration:")
 	log.Println("========================================")
 	log.Printf("INPUT_FOLDER: %s", cfg.InputFolder)

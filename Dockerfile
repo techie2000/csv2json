@@ -20,9 +20,17 @@ RUN go mod download
 # Copy source code
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
+COPY VERSION ./
 
-# Build binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o csv2json ./cmd/csv2json
+# Build with version information
+ARG VERSION
+ARG GIT_COMMIT
+ARG BUILD_DATE
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-w -s \
+    -X csv2json/internal/version.GitCommit=${GIT_COMMIT} \
+    -X csv2json/internal/version.BuildDate=${BUILD_DATE}" \
+    -o csv2json ./cmd/csv2json
 
 # Runtime stage
 FROM alpine:3.23
