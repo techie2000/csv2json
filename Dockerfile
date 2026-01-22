@@ -12,6 +12,7 @@ RUN git config --global http.sslVerify false
 # Set Go proxy to direct (bypass proxy.golang.org)
 ENV GOPROXY=direct
 ENV GOSUMDB=off
+ENV GOINSECURE=golang.org,github.com
 
 # Copy go mod files
 COPY go.mod go.sum ./
