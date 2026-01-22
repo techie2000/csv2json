@@ -221,6 +221,44 @@ Message 2:
 
 **Rationale:** Reading in-flight files causes corruption, partial processing, and race conditions. Safety first.
 
+**Source Filename Recommendations (STRONGLY RECOMMENDED):**
+
+Users should **include datetime stamps in source filenames** to ensure uniqueness and enable processing delay tracking.
+
+**❌ BAD: Generic filenames (collision risk)**
+
+```
+orders.csv          → Overwrites on each submission
+customers.csv       → No way to track individual batches
+```
+
+**✅ GOOD: Datetime-stamped filenames (unique, traceable)**
+
+```
+orders_20260122_103045.csv       → Unique, sortable, traceable
+customers_2026-01-22T10:30:45.csv → ISO8601 format
+sales_20260122103045_region1.csv  → Timestamp + context
+```
+
+**Benefits:**
+
+1. **Uniqueness**: Prevents filename collisions in input directory
+2. **Lineage**: Each file batch is uniquely identifiable
+3. **Processing Delay Measurement**: Compare source timestamp to archive timestamp
+   - Source: `orders_20260122_103045.csv` (generated at 10:30:45)
+   - Archive: `orders_20260122_103045_20260122_103145.csv` (processed at 10:31:45)
+   - Delay: 1 minute between generation and processing
+4. **Audit Trail**: Complete chronological history of submissions
+5. **Debugging**: Easy to identify which file batch caused issues
+
+**Recommended Format:** `{basename}_{YYYYMMDD}_{HHMMSS}.csv`
+
+**Note:** The system adds an additional datetime suffix on archiving (e.g., `orders_20260122_103045_20260122_103145.csv`), where:
+- First timestamp: Source generation time (user-provided)
+- Second timestamp: Processing completion time (system-generated)
+
+**If users submit with generic filenames:** Files remain processable but lose uniqueness guarantees and processing delay visibility.
+
 ### 7. Error Handling Philosophy
 
 **One bad row does not poison the file.**
