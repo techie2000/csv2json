@@ -18,7 +18,14 @@ import (
 func main() {
 	// Parse command-line flags
 	versionFlag := flag.Bool("version", false, "Display version information")
+	helpFlag := flag.Bool("help", false, "Display usage information")
 	flag.Parse()
+
+	// Handle help flag
+	if *helpFlag {
+		printHelp()
+		os.Exit(0)
+	}
 
 	// Handle version flag
 	if *versionFlag {
@@ -218,4 +225,118 @@ func runMultiIngressMode(routesConfigPath string) {
 	}
 
 	log.Println("All routes stopped. Service shutdown complete.")
+}
+
+// printHelp displays comprehensive usage information
+func printHelp() {
+	fmt.Printf(`%s
+
+DESCRIPTION:
+    csv2json is a high-performance CSV-to-JSON conversion service that monitors
+    directories for incoming CSV files, converts them to JSON, and outputs to
+    files or message queues. Supports both single-input and multi-ingress routing
+    modes with event-driven or polling-based file detection.
+
+USAGE:
+    csv2json [OPTIONS]
+
+OPTIONS:
+    --help              Display this help information
+    --version           Display version information and exit
+
+OPERATIONAL MODES:
+    The service operates in one of two modes based on configuration:
+
+    1. LEGACY SINGLE-INPUT MODE (default)
+       - Monitors a single input directory
+       - Configured via environment variables
+       - Suitable for simple, single-source scenarios
+
+    2. MULTI-INGRESS ROUTING MODE (ADR-004)
+       - Monitors multiple input directories with independent configurations
+       - Configured via routes.json file
+       - Suitable for multi-source, multi-destination scenarios
+       - Set ROUTES_CONFIG environment variable to enable
+
+CONFIGURATION:
+    All configuration is managed through environment variables or routes.json.
+
+    Key Environment Variables (Legacy Mode):
+        ROUTES_CONFIG              Path to routes.json (enables Multi-Ingress Mode)
+        INPUT_FOLDER               Directory to monitor (default: ./input)
+        WATCH_MODE                 File detection: event|poll|hybrid (default: event)
+        POLL_INTERVAL_SECONDS      Polling interval (default: 5)
+        OUTPUT_TYPE                Output: file|queue (default: file)
+        OUTPUT_FOLDER              JSON output directory (default: ./output)
+        QUEUE_TYPE                 Queue system: rabbitmq (default)
+        QUEUE_HOST                 Queue server host (default: localhost)
+        QUEUE_PORT                 Queue server port (default: 5672)
+        QUEUE_NAME                 Queue name (required for queue mode)
+        HAS_HEADER                 CSV has header row (default: true)
+        DELIMITER                  Field delimiter (default: ,)
+        ARCHIVE_PROCESSED          Archive for processed files
+        ARCHIVE_FAILED             Archive for failed files
+        LOG_LEVEL                  Logging level (default: INFO)
+
+    See .env.example for complete configuration options.
+
+FILE DETECTION STRATEGIES (ADR-005):
+    event (default, recommended):
+        - Uses OS-level file system notifications (fsnotify)
+        - Immediate detection (~100ms latency)
+        - Zero CPU overhead when idle
+        - Automatically falls back to polling if unavailable
+
+    poll (legacy compatibility):
+        - Time-based directory scanning
+        - Works with all file systems (NFS, SMB, cloud mounts)
+        - Higher latency (5+ seconds)
+        - Continuous CPU usage
+
+    hybrid (maximum reliability):
+        - Primary: Event-driven monitoring
+        - Backup: Periodic polling (default: 60s)
+        - Best for critical systems requiring redundancy
+
+EXAMPLES:
+    # Display version
+    csv2json --version
+
+    # Run with default configuration (.env or environment variables)
+    csv2json
+
+    # Run in Multi-Ingress Routing Mode
+    export ROUTES_CONFIG=./routes.json
+    csv2json
+
+    # Run with custom poll interval
+    export POLL_INTERVAL_SECONDS=10
+    csv2json
+
+    # Run with queue output
+    export OUTPUT_TYPE=queue
+    export QUEUE_NAME=my_queue
+    export QUEUE_HOST=rabbitmq.example.com
+    csv2json
+
+ARCHITECTURE DECISION RECORDS:
+    ADR-001: Use Go over Python for performance and concurrency
+    ADR-002: Use RabbitMQ for message queuing (extensible to Kafka, SQS, etc.)
+    ADR-003: Core system principles (string values, empty strings, array structure)
+    ADR-004: Multi-ingress routing architecture for multi-source scenarios
+    ADR-005: Hybrid file detection strategy (event-driven with polling fallback)
+
+DOCUMENTATION:
+    README.md           Comprehensive documentation
+    TESTING.md          Testing strategy and guidelines
+    docs/adrs/          Architecture decision records
+    routes.json.example Example multi-ingress configuration
+    .env.example        Complete environment variable reference
+
+PROJECT:
+    Repository: github.com/techie2000/csv2json (pending first push)
+    License:    [To be added]
+    Version:    %s
+
+`, version.GetVersionInfo(), version.GetVersionInfo())
 }
