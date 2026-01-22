@@ -339,16 +339,69 @@ See `routes.json.example` for a complete configuration template.
 
 ## Installation
 
-### Prerequisites
+### Option 1: Download Pre-built Binaries (Recommended)
 
+Download the latest release from [GitHub Releases](https://github.com/techie2000/csv2json/releases):
+
+```bash
+# Linux (amd64)
+curl -LO https://github.com/techie2000/csv2json/releases/latest/download/csv2json-linux-amd64
+chmod +x csv2json-linux-amd64
+./csv2json-linux-amd64 -version
+
+# Linux (arm64)
+curl -LO https://github.com/techie2000/csv2json/releases/latest/download/csv2json-linux-arm64
+chmod +x csv2json-linux-arm64
+./csv2json-linux-arm64 -version
+
+# macOS (Intel)
+curl -LO https://github.com/techie2000/csv2json/releases/latest/download/csv2json-darwin-amd64
+chmod +x csv2json-darwin-amd64
+./csv2json-darwin-amd64 -version
+
+# macOS (Apple Silicon)
+curl -LO https://github.com/techie2000/csv2json/releases/latest/download/csv2json-darwin-arm64
+chmod +x csv2json-darwin-arm64
+./csv2json-darwin-arm64 -version
+
+# Windows (PowerShell)
+Invoke-WebRequest -Uri "https://github.com/techie2000/csv2json/releases/latest/download/csv2json-windows-amd64.exe" -OutFile "csv2json.exe"
+.\csv2json.exe -version
+```
+
+**Verify checksums:**
+```bash
+curl -LO https://github.com/techie2000/csv2json/releases/latest/download/csv2json-linux-amd64.sha256
+sha256sum -c csv2json-linux-amd64.sha256
+```
+
+### Option 2: Docker (Pre-built Images)
+
+```bash
+# Pull from GitHub Container Registry
+docker pull ghcr.io/techie2000/csv2json:latest
+
+# Or use a specific version
+docker pull ghcr.io/techie2000/csv2json:v0.2.0
+
+# Run with Docker
+docker run -v ./data/input:/app/input -v ./data/output:/app/output ghcr.io/techie2000/csv2json:latest
+
+# Or use docker-compose (from repository)
+docker-compose up -d
+```
+
+### Option 3: Build from Source
+
+**Prerequisites:**
 - Go 1.25 or later
 - Git
 
-### Setup
+**Setup:**
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/techie2000/csv2json.git
 cd csv2json
 
 # Download dependencies

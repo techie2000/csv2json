@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Automated Release System**: GitHub Actions workflow for automated releases on version tags
+  - Automatic binary builds for 5 platforms (linux-amd64, linux-arm64, windows-amd64, darwin-amd64, darwin-arm64)
+  - SHA256 checksum generation for all binaries
+  - Automatic GitHub Release creation with CHANGELOG extraction
+  - Multi-architecture Docker image builds (linux/amd64, linux/arm64)
+  - Automatic push to GitHub Container Registry (ghcr.io)
+  - Pre-release detection for alpha/beta/rc versions
+
 ### Changed
-- Nothing yet
+- Installation documentation now prioritizes pre-built binaries over building from source
+- Added comprehensive Docker image usage instructions with ghcr.io registry
 
 ## [0.2.0] - 2026-01-22
 

@@ -117,22 +117,36 @@ When incrementing the version for a release:
    # Push tag to remote
    git push origin vX.Y.Z
    ```
+   
+   **🤖 Automated Release Process:**
+   - Pushing a tag automatically triggers the GitHub Actions release workflow
+   - The workflow will:
+     - Extract release notes from CHANGELOG.md
+     - Build binaries for all platforms (linux-amd64, linux-arm64, windows-amd64, darwin-amd64, darwin-arm64)
+     - Generate SHA256 checksums for all binaries
+     - Create a GitHub Release with binaries attached
+     - Build and push Docker images to GitHub Container Registry (ghcr.io)
+     - Tag Docker images with version number and "latest"
+   - **No manual steps required** - just push the tag!
 
-4. **Build Release Binaries**
+4. **Verify Automated Release (GitHub Actions)**
+   - [ ] Monitor workflow at: `https://github.com/{owner}/{repo}/actions`
+   - [ ] Verify GitHub Release created at: `https://github.com/{owner}/{repo}/releases`
+   - [ ] Verify binaries attached to release
+   - [ ] Verify Docker image pushed to: `ghcr.io/{owner}/{repo}:vX.Y.Z`
+   - [ ] Check workflow notifications for any failures
+
+5. **Manual Verification (Optional)**
    ```bash
-   make build-all  # Cross-compile for all platforms
+   # Download and verify binary
+   curl -LO https://github.com/{owner}/{repo}/releases/download/vX.Y.Z/csv2json-linux-amd64
+   curl -LO https://github.com/{owner}/{repo}/releases/download/vX.Y.Z/csv2json-linux-amd64.sha256
+   sha256sum -c csv2json-linux-amd64.sha256
+   
+   # Pull and test Docker image
+   docker pull ghcr.io/{owner}/{repo}:vX.Y.Z
+   docker run --rm ghcr.io/{owner}/{repo}:vX.Y.Z ./csv2json -version
    ```
-
-5. **Verify Version Information**
-   ```bash
-   ./csv2json -version  # Should show correct version
-   ```
-
-6. **Create GitHub Release (if applicable)**
-   - [ ] Use tag vX.Y.Z
-   - [ ] Copy relevant section from CHANGELOG.md as release notes
-   - [ ] Attach compiled binaries
-   - [ ] Mark as pre-release if applicable
 
 ## Version Checking
 
@@ -157,7 +171,9 @@ grep 'const Version' internal/version/version.go
 
 ## Docker Build with Version
 
-When building Docker images, pass version information as build args:
+### Local Docker Build
+
+When building Docker images locally, pass version information as build args:
 
 ```bash
 docker build \
@@ -168,6 +184,34 @@ docker build \
   -t csv2json:latest \
   .
 ```
+
+### Automated Docker Build (GitHub Actions)
+
+Docker images are automatically built and pushed to GitHub Container Registry when you push a version tag:
+
+**Automatic Process:**
+1. Push tag: `git push origin vX.Y.Z`
+2. GitHub Actions builds multi-architecture images (linux/amd64, linux/arm64)
+3. Images pushed to: `ghcr.io/{owner}/{repo}`
+4. Tagged with: `vX.Y.Z`, `X.Y`, `X`, and `latest`
+
+**Using Published Images:**
+```bash
+# Pull specific version
+docker pull ghcr.io/techie2000/csv2json:v0.2.0
+
+# Pull latest
+docker pull ghcr.io/techie2000/csv2json:latest
+
+# Pull major version (gets latest minor/patch)
+docker pull ghcr.io/techie2000/csv2json:0
+
+# Run with Docker
+docker run -v ./data:/app/input ghcr.io/techie2000/csv2json:latest
+```
+
+**Note:** First time pushing to ghcr.io, you may need to make the package public in GitHub settings:
+`Settings → Packages → csv2json → Package settings → Change visibility → Public`
 
 ## Critical Rules
 
