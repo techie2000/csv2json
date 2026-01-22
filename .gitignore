@@ -1,0 +1,40 @@
+# Environment configuration
+.env
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Build output
+txt2json
+txt2json-*
+/bin/
+/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+*.test
+coverage.out
+*.prof
+
+# Logs
+*.log
+
+# Runtime data directory
+data/
+
+# OS
+.DS_Store
+Thumbs.db

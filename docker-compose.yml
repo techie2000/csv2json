@@ -1,0 +1,63 @@
+services:
+  txt2json:
+    build: .
+    container_name: txt2json-service
+    volumes:
+      - ./data/input:/app/input
+      - ./data/output:/app/output
+      - ./data/archive:/app/archive
+      - ./data/logs:/app/logs
+    environment:
+      - INPUT_FOLDER=/app/input
+      - OUTPUT_FOLDER=/app/output
+      - POLL_INTERVAL_SECONDS=5
+      - MAX_FILES_PER_POLL=50
+      - FILE_SUFFIX_FILTER=.csv
+      - DELIMITER=,
+      - QUOTECHAR="
+      - ENCODING=utf-8
+      - HAS_HEADER=true
+      - ARCHIVE_PROCESSED=/app/archive/processed
+      - ARCHIVE_IGNORED=/app/archive/ignored
+      - ARCHIVE_FAILED=/app/archive/failed
+      - ARCHIVE_TIMESTAMP=true
+      - LOG_LEVEL=INFO
+      - LOG_FILE=/app/logs/txt2json.log
+      - LOG_QUEUE_MESSAGES=true
+      - OUTPUT_TYPE=queue
+      - QUEUE_TYPE=rabbitmq
+      - QUEUE_HOST=rabbitmq
+      - QUEUE_PORT=5672
+      - QUEUE_NAME=json_output
+      - QUEUE_USERNAME=admin
+      - QUEUE_PASSWORD=password
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Optional: RabbitMQ for queue-based output
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: txt2json-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    # To use RabbitMQ, update txt2json service environment:
+    # - OUTPUT_TYPE=queue
+    # - QUEUE_TYPE=rabbitmq
+    # - QUEUE_HOST=rabbitmq
+    # - QUEUE_PORT=5672
+    # - QUEUE_NAME=json_output
+    # - QUEUE_USERNAME=admin
+    # - QUEUE_PASSWORD=password

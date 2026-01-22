@@ -1,0 +1,5 @@
+[
+  {"name": "John Doe", "description": "Product Manager", "value": "1000"},
+  {"name": "Jane Smith", "description": "Software \"Engineer\"", "value": "2000"},
+  {"name": "Bob Jones", "description": "Sales, Marketing", "value": "1500"}
+]
