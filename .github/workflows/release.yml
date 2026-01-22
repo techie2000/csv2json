@@ -33,18 +33,18 @@ jobs:
         run: |
           # Extract the section for this version from CHANGELOG.md
           VERSION=${{ steps.get_version.outputs.version }}
-          
+
           # Find the section between [VERSION] and the next version or end
           CHANGELOG=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
-          
+
           # If empty, use the tag annotation
           if [ -z "$CHANGELOG" ]; then
             CHANGELOG="Release version $VERSION"
           fi
-          
+
           # Save to file for multiline output
           echo "$CHANGELOG" > release_notes.md
-          
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -103,12 +103,12 @@ jobs:
           VERSION=${{ needs.create-release.outputs.version }}
           GIT_COMMIT=${{ steps.metadata.outputs.git_commit }}
           BUILD_DATE=${{ steps.metadata.outputs.build_date }}
-          
+
           LDFLAGS="-w -s -X csv2json/internal/version.GitCommit=$GIT_COMMIT -X csv2json/internal/version.BuildDate=$BUILD_DATE"
-          
+
           OUTPUT_NAME="csv2json-${{ matrix.suffix }}"
           go build -ldflags="$LDFLAGS" -o "$OUTPUT_NAME" ./cmd/csv2json
-          
+
           # Create checksum
           if [ "${{ matrix.goos }}" = "windows" ]; then
             sha256sum "$OUTPUT_NAME" > "$OUTPUT_NAME.sha256"

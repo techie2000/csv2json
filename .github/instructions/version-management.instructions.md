@@ -117,7 +117,7 @@ When incrementing the version for a release:
    # Push tag to remote
    git push origin vX.Y.Z
    ```
-   
+
    **🤖 Automated Release Process:**
    - Pushing a tag automatically triggers the GitHub Actions release workflow
    - The workflow will:
@@ -142,7 +142,7 @@ When incrementing the version for a release:
    curl -LO https://github.com/{owner}/{repo}/releases/download/vX.Y.Z/csv2json-linux-amd64
    curl -LO https://github.com/{owner}/{repo}/releases/download/vX.Y.Z/csv2json-linux-amd64.sha256
    sha256sum -c csv2json-linux-amd64.sha256
-   
+
    # Pull and test Docker image
    docker pull ghcr.io/{owner}/{repo}:vX.Y.Z
    docker run --rm ghcr.io/{owner}/{repo}:vX.Y.Z ./csv2json -version
