@@ -13,7 +13,7 @@ func TestNew(t *testing.T) {
 	pollInterval := 5 * time.Second
 	maxFiles := 10
 
-	m := New(watchFolder, pollInterval, maxFiles)
+	m := NewPollingMonitor(watchFolder, pollInterval, maxFiles)
 
 	if m == nil {
 		t.Fatal("New() returned nil")
@@ -48,7 +48,7 @@ func TestScanExisting(t *testing.T) {
 		}
 	}
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.scanExisting()
 
 	if len(m.processedFiles) != len(existingFiles) {
@@ -73,7 +73,7 @@ func TestScanExisting_IgnoresDirs(t *testing.T) {
 		t.Fatalf("Failed to create directory: %v", err)
 	}
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.scanExisting()
 
 	if len(m.processedFiles) != 1 {
@@ -89,7 +89,7 @@ func TestMaxFilesPerPoll(t *testing.T) {
 	tempDir := t.TempDir()
 	maxFiles := 3
 
-	m := New(tempDir, 1*time.Second, maxFiles)
+	m := NewPollingMonitor(tempDir, 1*time.Second, maxFiles)
 	m.running = true
 
 	// Create more files than maxFiles limit
@@ -136,7 +136,7 @@ func TestMaxFilesPerPoll_Zero(t *testing.T) {
 	tempDir := t.TempDir()
 	maxFiles := 0 // Zero means no limit
 
-	m := New(tempDir, 1*time.Second, maxFiles)
+	m := NewPollingMonitor(tempDir, 1*time.Second, maxFiles)
 	m.running = true
 
 	// Create multiple files
@@ -177,7 +177,7 @@ func TestScan_SkipsProcessedFiles(t *testing.T) {
 		t.Fatalf("Failed to create file1: %v", err)
 	}
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.running = true
 
 	processedCount := 0
@@ -209,7 +209,7 @@ func TestScan_SkipsProcessedFiles(t *testing.T) {
 func TestScan_ProcessesNewFiles(t *testing.T) {
 	tempDir := t.TempDir()
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.running = true
 
 	processedFiles := []string{}
@@ -274,7 +274,7 @@ func TestScan_CallbackError(t *testing.T) {
 		t.Fatalf("Failed to create file1: %v", err)
 	}
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.running = true
 
 	// Callback that returns an error should not stop processing
@@ -307,7 +307,7 @@ func TestScan_IgnoresDirectories(t *testing.T) {
 		t.Fatalf("Failed to create subdir: %v", err)
 	}
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.running = true
 
 	processedCount := 0
@@ -328,7 +328,7 @@ func TestScan_IgnoresDirectories(t *testing.T) {
 
 func TestStop(t *testing.T) {
 	tempDir := t.TempDir()
-	m := New(tempDir, 100*time.Millisecond, 10)
+	m := NewPollingMonitor(tempDir, 100*time.Millisecond, 10)
 
 	// Start monitor in goroutine
 	var wg sync.WaitGroup
@@ -374,7 +374,7 @@ func BenchmarkScan_SmallFiles(b *testing.B) {
 		os.WriteFile(filename, []byte("test"), 0644)
 	}
 
-	m := New(tempDir, 1*time.Second, 0)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 0)
 	m.running = true
 
 	callback := func(path string) error {
@@ -398,7 +398,7 @@ func BenchmarkScan_WithLimit(b *testing.B) {
 		os.WriteFile(filename, []byte("test"), 0644)
 	}
 
-	m := New(tempDir, 1*time.Second, 10)
+	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
 	m.running = true
 
 	callback := func(path string) error {

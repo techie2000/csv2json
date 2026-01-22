@@ -17,8 +17,8 @@ type Processor struct {
 	parser    *parser.Parser
 	archiver  *archiver.Archiver
 	output    output.Handler
-	monitor   *monitor.Monitor
-	routeName string // Optional route name for multi-ingress mode
+	monitor   monitor.FileMonitor // Changed from *monitor.Monitor to interface
+	routeName string               // Optional route name for multi-ingress mode
 }
 
 func New(cfg *config.Config) (*Processor, error) {
@@ -47,7 +47,17 @@ func New(cfg *config.Config) (*Processor, error) {
 		return nil, fmt.Errorf("failed to create output handler: %w", err)
 	}
 
-	mon := monitor.New(cfg.InputFolder, cfg.PollInterval, cfg.MaxFilesPerPoll)
+	// Create appropriate monitor based on watch mode
+	mon, err := monitor.NewMonitor(
+		monitor.WatchMode(cfg.WatchMode),
+		cfg.InputFolder,
+		cfg.PollInterval,
+		cfg.HybridPollInterval,
+		cfg.MaxFilesPerPoll,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create file monitor: %w", err)
+	}
 
 	return &Processor{
 		config:    cfg,

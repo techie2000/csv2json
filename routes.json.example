@@ -5,7 +5,8 @@
       "input": {
         "path": "./data/input/products",
         "filenamePattern": "products_.*\\.csv",
-        "pollIntervalSeconds": 10,
+        "watchMode": "event",
+        "pollIntervalSeconds": 5,
         "maxFilesPerPoll": 5
       },
       "parsing": {
@@ -29,7 +30,9 @@
       "input": {
         "path": "./data/input/orders",
         "filenamePattern": "orders_.*\\.csv",
-        "pollIntervalSeconds": 5
+        "watchMode": "hybrid",
+        "pollIntervalSeconds": 5,
+        "hybridPollIntervalSeconds": 60
       },
       "parsing": {
         "hasHeader": true,
@@ -49,6 +52,7 @@
       "input": {
         "path": "./data/input/accounts",
         "suffixFilter": ".csv",
+        "watchMode": "poll",
         "pollIntervalSeconds": 15
       },
       "parsing": {

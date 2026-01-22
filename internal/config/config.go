@@ -17,11 +17,13 @@ type Config struct {
 	RoutesConfigPath string // Path to routes.json (if using multi-ingress mode)
 
 	// Input settings
-	InputFolder      string
-	PollInterval     time.Duration
-	MaxFilesPerPoll  int
-	FileSuffixFilter []string
-	FilenamePattern  *regexp.Regexp
+	InputFolder           string
+	PollInterval          time.Duration
+	MaxFilesPerPoll       int
+	FileSuffixFilter      []string
+	FilenamePattern       *regexp.Regexp
+	WatchMode             string // "event", "poll", or "hybrid"
+	HybridPollInterval    time.Duration
 
 	// Parsing settings
 	Delimiter rune
@@ -58,11 +60,13 @@ func Load() (*Config, error) {
 	_ = godotenv.Load()
 
 	cfg := &Config{
-		RoutesConfigPath: getEnv("ROUTES_CONFIG", ""), // Empty = legacy single-input mode
-		InputFolder:      getEnv("INPUT_FOLDER", "./input"),
-		PollInterval:     getDurationEnv("POLL_INTERVAL_SECONDS", 5) * time.Second,
-		MaxFilesPerPoll:  getIntEnv("MAX_FILES_PER_POLL", 0), // 0 = no limit
-		Delimiter:        rune(getEnv("DELIMITER", ",")[0]),
+		RoutesConfigPath:   getEnv("ROUTES_CONFIG", ""), // Empty = legacy single-input mode
+		InputFolder:        getEnv("INPUT_FOLDER", "./input"),
+		PollInterval:       getDurationEnv("POLL_INTERVAL_SECONDS", 5) * time.Second,
+		HybridPollInterval: getDurationEnv("HYBRID_POLL_INTERVAL_SECONDS", 60) * time.Second,
+		MaxFilesPerPoll:    getIntEnv("MAX_FILES_PER_POLL", 0), // 0 = no limit
+		WatchMode:          getEnv("WATCH_MODE", "event"),
+		Delimiter:          rune(getEnv("DELIMITER", ",")[0]),
 		QuoteChar:        rune(getEnv("QUOTECHAR", "\"")[0]),
 		Encoding:         getEnv("ENCODING", "utf-8"),
 		HasHeader:        getBoolEnv("HAS_HEADER", true),

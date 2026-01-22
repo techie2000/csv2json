@@ -3,7 +3,7 @@ package version
 // Version is the current version of csv2json
 // This should be updated for each release following semantic versioning (MAJOR.MINOR.PATCH)
 // Update this value when incrementing the VERSION file
-const Version = "0.1.0"
+const Version = "0.2.0"
 
 // BuildDate is set at compile time via -ldflags
 var BuildDate = "unknown"

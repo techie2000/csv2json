@@ -11,14 +11,14 @@ import (
 )
 
 type QueueHandler struct {
-	queueType   string
-	conn        *amqp.Connection
-	channel     *amqp.Channel
-	queueName   string
-	converter   *converter.Converter
-	logMessages bool
-	routeName   string // Route name for context in messages
-	includeRoute bool  // Whether to include route context
+	queueType    string
+	conn         *amqp.Connection
+	channel      *amqp.Channel
+	queueName    string
+	converter    *converter.Converter
+	logMessages  bool
+	routeName    string // Route name for context in messages
+	includeRoute bool   // Whether to include route context
 }
 
 func NewQueueHandler(queueType, host string, port int, queueName, username, password string, logMessages bool) (*QueueHandler, error) {
@@ -104,9 +104,9 @@ func (h *QueueHandler) marshalMessageWithRoute(data []map[string]string, identif
 			Source string `json:"source"`
 		}
 		type MessageWithRoute struct {
-			Route      RouteContext         `json:"route"`
-			Identifier string               `json:"identifier"`
-			Data       []map[string]string  `json:"data"`
+			Route      RouteContext        `json:"route"`
+			Identifier string              `json:"identifier"`
+			Data       []map[string]string `json:"data"`
 		}
 		msg := MessageWithRoute{
 			Route:      RouteContext{Name: h.routeName, Source: identifier},

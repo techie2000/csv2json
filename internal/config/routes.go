@@ -20,13 +20,15 @@ type Route struct {
 
 // InputConfig defines input folder and filtering
 type InputConfig struct {
-	Path               string `json:"path"`
-	FilenamePattern    string `json:"filenamePattern,omitempty"`
-	SuffixFilter       string `json:"suffixFilter,omitempty"`
-	PollIntervalSec    int    `json:"pollIntervalSeconds"`
-	MaxFilesPerPoll    int    `json:"maxFilesPerPoll,omitempty"`
-	compiledPattern    *regexp.Regexp
-	compiledSuffixList []string
+	Path                  string `json:"path"`
+	FilenamePattern       string `json:"filenamePattern,omitempty"`
+	SuffixFilter          string `json:"suffixFilter,omitempty"`
+	WatchMode             string `json:"watchMode,omitempty"`              // "event", "poll", or "hybrid"
+	PollIntervalSec       int    `json:"pollIntervalSeconds,omitempty"`    // Used in poll/hybrid modes
+	HybridPollIntervalSec int    `json:"hybridPollIntervalSeconds,omitempty"` // Backup polling in hybrid mode
+	MaxFilesPerPoll       int    `json:"maxFilesPerPoll,omitempty"`
+	compiledPattern       *regexp.Regexp
+	compiledSuffixList    []string
 }
 
 // ParsingConfig defines CSV parsing semantics
@@ -39,9 +41,9 @@ type ParsingConfig struct {
 
 // OutputConfig defines destination and type
 type OutputConfig struct {
-	Type                string  `json:"type"` // "file" or "queue"
-	Destination         string  `json:"destination"`
-	IncludeRouteContext *bool   `json:"includeRouteContext,omitempty"` // Pointer to distinguish between unset and false
+	Type                string `json:"type"` // "file" or "queue"
+	Destination         string `json:"destination"`
+	IncludeRouteContext *bool  `json:"includeRouteContext,omitempty"` // Pointer to distinguish between unset and false
 }
 
 // ArchiveConfig defines archive paths
@@ -98,8 +100,14 @@ func LoadRoutes(configPath string) (*RoutesConfig, error) {
 		}
 
 		// Set defaults
+		if route.Input.WatchMode == "" {
+			route.Input.WatchMode = "event" // Default to event-driven
+		}
 		if route.Input.PollIntervalSec == 0 {
-			route.Input.PollIntervalSec = 10
+			route.Input.PollIntervalSec = 5 // Default poll interval for poll/fallback modes
+		}
+		if route.Input.HybridPollIntervalSec == 0 {
+			route.Input.HybridPollIntervalSec = 60 // Default backup polling in hybrid mode
 		}
 		if route.Parsing.Delimiter == "" {
 			route.Parsing.Delimiter = ","
@@ -160,11 +168,13 @@ func (r *Route) ToLegacyConfig() *Config {
 	}
 
 	cfg := &Config{
-		InputFolder:      r.Input.Path,
-		PollInterval:     time.Duration(r.Input.PollIntervalSec) * time.Second,
-		MaxFilesPerPoll:  r.Input.MaxFilesPerPoll,
-		FilenamePattern:  r.Input.compiledPattern,
-		Delimiter:        delimiter,
+		InputFolder:        r.Input.Path,
+		PollInterval:       time.Duration(r.Input.PollIntervalSec) * time.Second,
+		HybridPollInterval: time.Duration(r.Input.HybridPollIntervalSec) * time.Second,
+		MaxFilesPerPoll:    r.Input.MaxFilesPerPoll,
+		WatchMode:          r.Input.WatchMode,
+		FilenamePattern:    r.Input.compiledPattern,
+		Delimiter:          delimiter,
 		QuoteChar:        quoteChar,
 		Encoding:         r.Parsing.Encoding,
 		HasHeader:        r.Parsing.HasHeader,
