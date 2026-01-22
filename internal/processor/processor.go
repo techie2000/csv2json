@@ -13,11 +13,12 @@ import (
 )
 
 type Processor struct {
-	config   *config.Config
-	parser   *parser.Parser
-	archiver *archiver.Archiver
-	output   output.Handler
-	monitor  *monitor.Monitor
+	config    *config.Config
+	parser    *parser.Parser
+	archiver  *archiver.Archiver
+	output    output.Handler
+	monitor   *monitor.Monitor
+	routeName string // Optional route name for multi-ingress mode
 }
 
 func New(cfg *config.Config) (*Processor, error) {
@@ -49,12 +50,22 @@ func New(cfg *config.Config) (*Processor, error) {
 	mon := monitor.New(cfg.InputFolder, cfg.PollInterval, cfg.MaxFilesPerPoll)
 
 	return &Processor{
-		config:   cfg,
-		parser:   p,
-		archiver: arch,
-		output:   out,
-		monitor:  mon,
+		config:    cfg,
+		parser:    p,
+		archiver:  arch,
+		output:    out,
+		monitor:   mon,
+		routeName: "", // Empty for legacy mode
 	}, nil
+}
+
+// SetRouteName configures route context for multi-ingress mode
+func (p *Processor) SetRouteName(name string, includeInOutput bool) {
+	p.routeName = name
+	// If output is a queue handler, enable route context
+	if qh, ok := p.output.(*output.QueueHandler); ok {
+		qh.SetRouteContext(name, includeInOutput)
+	}
 }
 
 func (p *Processor) Start() error {

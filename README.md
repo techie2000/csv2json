@@ -1,6 +1,6 @@
 # csv2json - CSV/Delimited File to JSON Conversion Service
 
-A high-performance, production-ready file polling service written in **Go** that monitors a directory for CSV/delimited files, validates them, converts them to JSON format, and archives files based on processing status.
+A high-performance, production-ready file polling service written in **Go** that monitors directories for CSV/delimited files, validates them, converts them to JSON format, and routes outputs to files or message queues.
 
 **Built with Go for:**
 
@@ -15,18 +15,24 @@ A high-performance, production-ready file polling service written in **Go** that
 
 ## Features
 
-- **Continuous File Monitoring**: Polls a specified directory for new files
+- **Two Operational Modes**:
+  - **Legacy Mode**: Single input folder → single output destination
+  - **Multi-Ingress Routing Mode**: Multiple input folders → multiple output destinations (ADR-004)
+- **Continuous File Monitoring**: Polls specified directories for new files
 - **Flexible Format Support**: Handles CSV and other delimited formats (TSV, pipe-delimited, etc.)
 - **Content Validation**: Validates file content regardless of file extension
-- **Configurable Filtering**: Optional filename pattern and suffix filtering
+- **Configurable Filtering**: Per-route filename patterns and suffix filtering
 - **Multiple Output Options**: Write JSON to files or message queues (RabbitMQ via AMQP)
+- **Route Context**: Automatic source tracking in queue messages for multi-ingress mode
 - **Intelligent Archiving**: Separate locations for processed, ignored, and failed files
 - **Quote Handling**: Supports both quoted and unquoted field values
-- **Environment-Based Configuration**: All settings via environment variables
+- **Configuration-Driven**: Routes defined via JSON config or environment variables
 
 > **Message Queue Support:** RabbitMQ is the primary supported queue system. See [ADR-002: Why RabbitMQ](docs/adrs/ADR-002-use-rabbitmq-for-queuing.md) for the decision rationale. AWS SQS and Azure Service Bus support are planned for future releases.
 
 ## Architecture
+
+### Legacy Single-Input Mode
 
 ```mermaid
 flowchart LR
@@ -50,6 +56,38 @@ flowchart LR
     style D2 fill:#f8d7da
 ```
 
+### Multi-Ingress Routing Mode (ADR-004)
+
+```mermaid
+flowchart TB
+    subgraph Routes["Configuration-Driven Routes"]
+        R1[Route: Products<br/>products/ → products_queue]
+        R2[Route: Orders<br/>orders/ → orders_queue]
+        R3[Route: Accounts<br/>accounts/ → file output]
+    end
+    
+    subgraph Service["Single Service Instance"]
+        P1[Processor 1]
+        P2[Processor 2]
+        P3[Processor 3]
+    end
+    
+    R1 --> P1
+    R2 --> P2
+    R3 --> P3
+    
+    P1 --> Q1[products_queue<br/>with route context]
+    P2 --> Q2[orders_queue<br/>with route context]
+    P3 --> F[File Output]
+    
+    style R1 fill:#e1f5ff
+    style R2 fill:#e1f5ff
+    style R3 fill:#e1f5ff
+    style Q1 fill:#d4edda
+    style Q2 fill:#d4edda
+    style F fill:#d4edda
+```
+
 ### Component Flow
 
 1. **File Detection**: Monitor polls input folder at configured interval
@@ -62,7 +100,18 @@ flowchart LR
 
 ## Configuration
 
-All configuration is managed through environment variables:
+All configuration is managed through environment variables. The service supports two operational modes:
+
+### Mode Selection
+
+| Variable         | Description                                                              | Default |
+|------------------|--------------------------------------------------------------------------|---------|
+| `ROUTES_CONFIG`  | Path to `routes.json` for Multi-Ingress Routing Mode. If empty, runs in Legacy Single-Input Mode | -       |
+
+**If `ROUTES_CONFIG` is set:** Service runs in **Multi-Ingress Routing Mode** (see below).  
+**If `ROUTES_CONFIG` is empty:** Service runs in **Legacy Single-Input Mode** using environment variables below.
+
+### Legacy Single-Input Mode Configuration
 
 ### Input Settings
 
@@ -130,6 +179,126 @@ Jane,25,designer
 | `LOG_LEVEL`          | Logging level (DEBUG, INFO, WARNING, ERROR)                                      | `INFO`                   |
 | `LOG_FILE`           | Log file path                                                                    | `./logs/csv2json.log`    |
 | `LOG_QUEUE_MESSAGES` | Log full message content when sending to queue (for visibility, queue mode only) | `false`                  |
+
+## Multi-Ingress Routing Mode (ADR-004)
+
+For handling multiple input sources with different destinations, use **Multi-Ingress Routing Mode**:
+
+### Configuration
+
+Set the `ROUTES_CONFIG` environment variable to point to your `routes.json` file:
+
+```bash
+export ROUTES_CONFIG=./routes.json
+```
+
+### routes.json Structure
+
+```json
+{
+  "routes": [
+    {
+      "name": "products",
+      "input": {
+        "path": "./data/input/products",
+        "filenamePattern": "products_.*\\.csv",
+        "pollIntervalSeconds": 10,
+        "maxFilesPerPoll": 5
+      },
+      "parsing": {
+        "hasHeader": true,
+        "delimiter": ",",
+        "quoteChar": "\"",
+        "encoding": "utf-8"
+      },
+      "output": {
+        "type": "queue",
+        "destination": "products_queue",
+        "includeRouteContext": true
+      },
+      "archive": {
+        "processedPath": "./data/archive/products/processed",
+        "failedPath": "./data/archive/products/failed",
+        "ignoredPath": "./data/archive/products/ignored"
+      }
+    }
+  ]
+}
+```
+
+### Route Configuration Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | ✅ | Unique route identifier |
+| `input.path` | ✅ | Directory to monitor |
+| `input.filenamePattern` | ❌ | Regex pattern for filename filtering |
+| `input.suffixFilter` | ❌ | File extension filter (e.g., `.csv`) |
+| `input.pollIntervalSeconds` | ❌ | Polling interval (default: 10) |
+| `input.maxFilesPerPoll` | ❌ | Max files per cycle (default: 0 = unlimited) |
+| `parsing.hasHeader` | ❌ | CSV has header row (default: true) |
+| `parsing.delimiter` | ❌ | Field delimiter (default: `,`) |
+| `parsing.quoteChar` | ❌ | Quote character (default: `"`) |
+| `parsing.encoding` | ❌ | File encoding (default: `utf-8`) |
+| `output.type` | ✅ | `file` or `queue` |
+| `output.destination` | ✅ | Queue name or file output folder |
+| `output.includeRouteContext` | ❌ | Add route metadata to queue messages (default: true for queue, ignored for file) |
+| `archive.processedPath` | ✅ | Archive location for successful files |
+| `archive.failedPath` | ✅ | Archive location for failed files |
+| `archive.ignoredPath` | ❌ | Archive location for ignored files |
+
+### Queue Message Format with Route Context
+
+When `includeRouteContext: true`, queue messages include source routing metadata:
+
+```json
+{
+  "route": {
+    "name": "products",
+    "source": "/data/input/products/products_20260122_103045.csv"
+  },
+  "identifier": "products_20260122_103045.csv",
+  "data": [
+    {"sku": "ABC123", "name": "Widget", "price": "29.99"}
+  ]
+}
+```
+
+### Benefits of Multi-Ingress Mode
+
+✅ **One service handles multiple data sources**  
+✅ **Config-only additions** - no code deployment needed  
+✅ **Route context enables downstream routing decisions**  
+✅ **Operational simplicity** - single binary, fewer moving parts  
+✅ **Partitionable** - split routes across instances when needed  
+
+### Example: Three Routes in One Service
+
+```json
+{
+  "routes": [
+    {
+      "name": "products",
+      "input": {"path": "./input/products"},
+      "output": {"type": "queue", "destination": "products_queue"}
+    },
+    {
+      "name": "orders",
+      "input": {"path": "./input/orders"},
+      "output": {"type": "queue", "destination": "orders_queue"}
+    },
+    {
+      "name": "accounts",
+      "input": {"path": "./input/accounts"},
+      "output": {"type": "file", "destination": "./output/accounts"}
+    }
+  ]
+}
+```
+
+See `routes.json.example` for a complete configuration template.
+
+**Documentation:** [ADR-004: Multi-Ingress Routing Architecture](docs/adrs/ADR-004-multi-ingress-routing-architecture.md)
 
 ## Installation
 

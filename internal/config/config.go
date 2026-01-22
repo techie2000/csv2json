@@ -13,6 +13,9 @@ import (
 )
 
 type Config struct {
+	// Routing settings
+	RoutesConfigPath string // Path to routes.json (if using multi-ingress mode)
+
 	// Input settings
 	InputFolder      string
 	PollInterval     time.Duration
@@ -55,6 +58,7 @@ func Load() (*Config, error) {
 	_ = godotenv.Load()
 
 	cfg := &Config{
+		RoutesConfigPath: getEnv("ROUTES_CONFIG", ""), // Empty = legacy single-input mode
 		InputFolder:      getEnv("INPUT_FOLDER", "./input"),
 		PollInterval:     getDurationEnv("POLL_INTERVAL_SECONDS", 5) * time.Second,
 		MaxFilesPerPoll:  getIntEnv("MAX_FILES_PER_POLL", 0), // 0 = no limit

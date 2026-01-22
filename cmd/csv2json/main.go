@@ -53,6 +53,18 @@ func main() {
 		log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	}
 
+	// Check if using multi-ingress routing mode
+	if cfg.RoutesConfigPath != "" {
+		log.Printf("Starting in MULTI-INGRESS ROUTING mode with config: %s", cfg.RoutesConfigPath)
+		runMultiIngressMode(cfg.RoutesConfigPath)
+	} else {
+		log.Println("Starting in LEGACY SINGLE-INPUT mode")
+		runLegacyMode(cfg)
+	}
+}
+
+// runLegacyMode runs the service in single-input mode (original behavior)
+func runLegacyMode(cfg *config.Config) {
 	// Initialize processor
 	proc, err := processor.New(cfg)
 	if err != nil {
@@ -117,4 +129,89 @@ func main() {
 
 	proc.Stop()
 	log.Println("Service stopped")
+}
+
+// runMultiIngressMode runs the service in multi-ingress routing mode (ADR-004)
+func runMultiIngressMode(routesConfigPath string) {
+	// Load routes configuration
+	routesConfig, err := config.LoadRoutes(routesConfigPath)
+	if err != nil {
+		log.Fatalf("Failed to load routes configuration: %v", err)
+	}
+
+	if len(routesConfig.Routes) == 0 {
+		log.Fatal("No routes configured in routes.json")
+	}
+
+	log.Printf("Loaded %d route(s) from configuration", len(routesConfig.Routes))
+
+	// Create a processor for each route
+	processors := make([]*processor.Processor, 0, len(routesConfig.Routes))
+
+	for i, route := range routesConfig.Routes {
+		log.Printf("Initializing route %d/%d: %s", i+1, len(routesConfig.Routes), route.Name)
+
+		// Convert route to legacy config
+		routeCfg := route.ToLegacyConfig()
+
+		// Initialize processor for this route
+		proc, err := processor.New(routeCfg)
+		if err != nil {
+			log.Fatalf("Failed to initialize processor for route '%s': %v", route.Name, err)
+		}
+
+		// Set route context if using queue output
+		if route.Output.Type == "queue" {
+			proc.SetRouteName(route.Name, route.Output.IncludeRouteContext)
+		}
+
+		processors = append(processors, proc)
+
+		// Log route configuration
+		log.Println("----------------------------------------")
+		log.Printf("Route: %s", route.Name)
+		log.Printf("  Input: %s", route.Input.Path)
+		log.Printf("  Output: %s -> %s", route.Output.Type, route.Output.Destination)
+		if route.Input.FilenamePattern != "" {
+			log.Printf("  Pattern: %s", route.Input.FilenamePattern)
+		}
+		log.Printf("  PollInterval: %ds", route.Input.PollIntervalSec)
+		log.Println("----------------------------------------")
+	}
+
+	// Log startup summary
+	log.Println("========================================")
+	log.Printf("%s", version.GetFullVersionInfo())
+	log.Printf("Multi-Ingress Routing Mode: %d active routes", len(processors))
+	log.Println("========================================")
+
+	// Setup graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	// Start all processors in goroutines
+	for i, proc := range processors {
+		routeName := routesConfig.Routes[i].Name
+		go func(p *processor.Processor, name string) {
+			log.Printf("Starting route processor: %s", name)
+			if err := p.Start(); err != nil {
+				log.Printf("ERROR: Route '%s' processor failed: %v", name, err)
+			}
+		}(proc, routeName)
+	}
+
+	log.Println("All routes active. Monitoring for new files. Press Ctrl+C to stop.")
+
+	// Wait for shutdown signal
+	<-sigChan
+	log.Println("Shutdown signal received, stopping all routes gracefully...")
+
+	// Stop all processors
+	for i, proc := range processors {
+		routeName := routesConfig.Routes[i].Name
+		log.Printf("Stopping route: %s", routeName)
+		proc.Stop()
+	}
+
+	log.Println("All routes stopped. Service shutdown complete.")
 }

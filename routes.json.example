@@ -1,0 +1,68 @@
+{
+  "routes": [
+    {
+      "name": "products",
+      "input": {
+        "path": "./data/input/products",
+        "filenamePattern": "products_.*\\.csv",
+        "pollIntervalSeconds": 10,
+        "maxFilesPerPoll": 5
+      },
+      "parsing": {
+        "hasHeader": true,
+        "delimiter": ",",
+        "quoteChar": "\"",
+        "encoding": "utf-8"
+      },
+      "output": {
+        "type": "queue",
+        "destination": "products_queue"
+      },
+      "archive": {
+        "processedPath": "./data/archive/products/processed",
+        "failedPath": "./data/archive/products/failed",
+        "ignoredPath": "./data/archive/products/ignored"
+      }
+    },
+    {
+      "name": "orders",
+      "input": {
+        "path": "./data/input/orders",
+        "filenamePattern": "orders_.*\\.csv",
+        "pollIntervalSeconds": 5
+      },
+      "parsing": {
+        "hasHeader": true,
+        "delimiter": ","
+      },
+      "output": {
+        "type": "queue",
+        "destination": "orders_queue"
+      },
+      "archive": {
+        "processedPath": "./data/archive/orders/processed",
+        "failedPath": "./data/archive/orders/failed"
+      }
+    },
+    {
+      "name": "accounts",
+      "input": {
+        "path": "./data/input/accounts",
+        "suffixFilter": ".csv",
+        "pollIntervalSeconds": 15
+      },
+      "parsing": {
+        "hasHeader": false,
+        "delimiter": "|"
+      },
+      "output": {
+        "type": "file",
+        "destination": "./data/output/accounts"
+      },
+      "archive": {
+        "processedPath": "./data/archive/accounts/processed",
+        "failedPath": "./data/archive/accounts/failed"
+      }
+    }
+  ]
+}

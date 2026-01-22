@@ -3,6 +3,7 @@ package output
 import (
 	"csv2json/internal/converter"
 	"csv2json/internal/parser"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -16,14 +17,17 @@ type QueueHandler struct {
 	queueName   string
 	converter   *converter.Converter
 	logMessages bool
+	routeName   string // Route name for context in messages
+	includeRoute bool  // Whether to include route context
 }
 
 func NewQueueHandler(queueType, host string, port int, queueName, username, password string, logMessages bool) (*QueueHandler, error) {
 	handler := &QueueHandler{
-		queueType:   queueType,
-		queueName:   queueName,
-		converter:   converter.New(),
-		logMessages: logMessages,
+		queueType:    queueType,
+		queueName:    queueName,
+		converter:    converter.New(),
+		logMessages:  logMessages,
+		includeRoute: true, // Default: include route context (changed in v0.2.0)
 	}
 
 	// Route to appropriate queue implementation
@@ -85,8 +89,38 @@ func (h *QueueHandler) initRabbitMQ(host string, port int, username, password st
 	return nil
 }
 
+// SetRouteContext enables route context in messages (for multi-ingress routing)
+func (h *QueueHandler) SetRouteContext(routeName string, include bool) {
+	h.routeName = routeName
+	h.includeRoute = include
+}
+
+// marshalMessageWithRoute creates message with optional route context
+func (h *QueueHandler) marshalMessageWithRoute(data []map[string]string, identifier string) ([]byte, error) {
+	if h.includeRoute && h.routeName != "" {
+		// ADR-004: Include route context
+		type RouteContext struct {
+			Name   string `json:"name"`
+			Source string `json:"source"`
+		}
+		type MessageWithRoute struct {
+			Route      RouteContext         `json:"route"`
+			Identifier string               `json:"identifier"`
+			Data       []map[string]string  `json:"data"`
+		}
+		msg := MessageWithRoute{
+			Route:      RouteContext{Name: h.routeName, Source: identifier},
+			Identifier: identifier,
+			Data:       data,
+		}
+		return json.Marshal(msg)
+	}
+	// Legacy format without route context
+	return marshalMessage(data, identifier)
+}
+
 func (h *QueueHandler) Send(data []map[string]string, identifier string) error {
-	message, err := marshalMessage(data, identifier)
+	message, err := h.marshalMessageWithRoute(data, identifier)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
@@ -107,8 +141,17 @@ func (h *QueueHandler) SendOrdered(result *parser.ParseResult, identifier string
 	}
 
 	// For queue output, we wrap the data in a message envelope
-	// but the data itself preserves CSV column order per ADR-003
-	message := []byte(fmt.Sprintf(`{"identifier":"%s","data":%s}`, identifier, string(jsonBytes)))
+	// Include route context if enabled (ADR-004)
+	var message []byte
+	if h.includeRoute && h.routeName != "" {
+		message = []byte(fmt.Sprintf(
+			`{"route":{"name":"%s","source":"%s"},"identifier":"%s","data":%s}`,
+			h.routeName, identifier, identifier, string(jsonBytes),
+		))
+	} else {
+		// Legacy format without route context
+		message = []byte(fmt.Sprintf(`{"identifier":"%s","data":%s}`, identifier, string(jsonBytes)))
+	}
 
 	switch h.queueType {
 	case "rabbitmq":
