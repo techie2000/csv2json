@@ -590,6 +590,15 @@ For security policies, vulnerability reporting, and security scanning informatio
 - Automatic issue creation for CVE fixes
 - Continuous dependency review
 
+## Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes, features, and fixes for each version.
+
+**Latest Release:** v0.2.0 (2026-01-22)
+- Multi-ingress routing architecture
+- Event-driven file detection (<100ms latency)
+- Comprehensive CLI documentation
+
 ## License
 
 MIT License - See LICENSE file for details
