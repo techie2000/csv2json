@@ -75,7 +75,7 @@ func Load() (*Config, error) {
 		ArchiveFailed:    getEnv("ARCHIVE_FAILED", "./archive/failed"),
 		ArchiveTimestamp: getBoolEnv("ARCHIVE_TIMESTAMP", true),
 		LogLevel:         getEnv("LOG_LEVEL", "INFO"),
-		LogFile:          getEnv("LOG_FILE", "./logs/txt2json.log"),
+		LogFile:          getEnv("LOG_FILE", "./logs/csv2json.log"),
 		LogQueueMessages: getBoolEnv("LOG_QUEUE_MESSAGES", false),
 	}
 

@@ -5,11 +5,11 @@ import (
 	"log"
 	"path/filepath"
 
-	"txt2json/internal/archiver"
-	"txt2json/internal/config"
-	"txt2json/internal/monitor"
-	"txt2json/internal/output"
-	"txt2json/internal/parser"
+	"csv2json/internal/archiver"
+	"csv2json/internal/config"
+	"csv2json/internal/monitor"
+	"csv2json/internal/output"
+	"csv2json/internal/parser"
 )
 
 type Processor struct {

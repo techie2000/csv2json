@@ -107,7 +107,7 @@ No vulnerabilities found.
 2. **Set up Go 1.25** environment
 3. **Trivy repo scan** - Scan filesystem for dependency vulnerabilities
 4. **Upload SARIF** - Results to GitHub Security tab
-5. **Build Docker image** - Build txt2json:latest
+5. **Build Docker image** - Build csv2json:latest
 6. **Trivy image scan** - Scan built image for OS/app vulnerabilities
 7. **Upload SARIF** - Docker scan results to Security tab
 8. **Trivy JSON output** - Detailed results for issue creation
@@ -223,7 +223,7 @@ docker-compose build --no-cache
 ### When Vulnerabilities Are Found
 
 1. **Review the GitHub issue** created by the workflow
-2. **Assess impact** - Does the vulnerability affect txt2json?
+2. **Assess impact** - Does the vulnerability affect csv2json?
 3. **Apply the fix** - Follow the recommended action in the issue
 4. **Test thoroughly:**
 
@@ -284,4 +284,4 @@ All requested changes have been implemented:
 3. ✅ Created CI/CD security workflow with automatic issue creation
 4. ✅ Documented security policies and procedures
 
-The txt2json project now has comprehensive automated security scanning with automatic issue creation for vulnerability remediation.
+The csv2json project now has comprehensive automated security scanning with automatic issue creation for vulnerability remediation.

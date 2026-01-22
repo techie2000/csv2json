@@ -3,7 +3,7 @@
 **Status:** Accepted  
 **Date:** 2026-01-20  
 **Decision Makers:** Development Team  
-**Context:** txt2json File Polling Service
+**Context:** csv2json File Polling Service
 
 ## Context and Problem Statement
 

@@ -1,12 +1,12 @@
 package output
 
 import (
+	"csv2json/internal/converter"
+	"csv2json/internal/parser"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"txt2json/internal/converter"
-	"txt2json/internal/parser"
 )
 
 type FileHandler struct {

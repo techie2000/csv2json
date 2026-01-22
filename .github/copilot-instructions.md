@@ -329,18 +329,18 @@ When adding, removing, or modifying environment variables:
 
 ### Module Path for GitHub Publishing (IMPORTANT)
 
-**Current State**: Module path is `txt2json` (local development)
+**Current State**: Module path is `csv2json` (local development)
 
 **Before pushing to GitHub for the first time:**
-1. Update `go.mod`: Change `module txt2json` to `module github.com/techie2000/txt2json`
-2. Update `cmd/txt2json/main.go`: Change `txt2json/internal/*` imports to `github.com/techie2000/txt2json/internal/*`
-3. Update `internal/processor/processor.go`: Change all `txt2json/internal/*` imports to `github.com/techie2000/txt2json/internal/*`
+1. Update `go.mod`: Change `module csv2json` to `module github.com/techie2000/csv2json`
+2. Update `cmd/csv2json/main.go`: Change `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
+3. Update `internal/processor/processor.go`: Change all `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
 4. Run `go mod tidy` to update dependencies
 5. Run `go test ./... -v` to verify all tests still pass
 
 **Files to update:**
 - `go.mod` (1 line)
-- `cmd/txt2json/main.go` (2 import lines)
+- `cmd/csv2json/main.go` (2 import lines)
 - `internal/processor/processor.go` (5 import lines)
 
 **Why**: Local module name works for development, but GitHub requires full path for remote imports and `go get`.
@@ -520,7 +520,7 @@ When making significant technical decisions:
 
 **Every functional code change MUST be accompanied by test updates or new tests.**
 
-When modifying Go code in txt2json:
+When modifying Go code in csv2json:
 
 1. **Identify Impact**: Determine which test modules are affected by the change
 2. **Update Tests**: Modify existing tests to match new behavior

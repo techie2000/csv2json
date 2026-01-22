@@ -1,9 +1,9 @@
 package output
 
 import (
+	"csv2json/internal/parser"
 	"encoding/json"
 	"fmt"
-	"txt2json/internal/parser"
 )
 
 type Handler interface {

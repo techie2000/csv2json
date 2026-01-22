@@ -72,7 +72,7 @@ govulncheck ./...
 ```bash
 # In GitHub Actions or environments without proxy issues
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-  aquasec/trivy image txt2json:latest
+  aquasec/trivy image csv2json:latest
 ```
 
 ## Reporting a Vulnerability
@@ -161,7 +161,7 @@ When upgrading Alpine:
 1. Update `Dockerfile` runtime stage: `FROM alpine:Z.ZZ`
 2. Rebuild: `docker-compose build --no-cache`
 3. Test services: `docker-compose up -d && docker-compose logs`
-4. Verify Alpine version: `docker exec txt2json-service cat /etc/alpine-release`
+4. Verify Alpine version: `docker exec csv2json-service cat /etc/alpine-release`
 
 ### Recent Upgrades
 

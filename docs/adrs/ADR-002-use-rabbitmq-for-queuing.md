@@ -3,11 +3,11 @@
 **Status:** Accepted  
 **Date:** 2026-01-20  
 **Decision Makers:** Development Team  
-**Context:** txt2json File Polling Service
+**Context:** csv2json File Polling Service
 
 ## Context and Problem Statement
 
-The txt2json service needs to support outputting converted JSON data to a message queue for downstream processing, in addition to file-based output. This enables asynchronous, decoupled processing and integration with event-driven architectures. The system must support a message broker that is:
+The csv2json service needs to support outputting converted JSON data to a message queue for downstream processing, in addition to file-based output. This enables asynchronous, decoupled processing and integration with event-driven architectures. The system must support a message broker that is:
 
 - Reliable and production-ready
 - Compatible with standard protocols for portability

@@ -3,7 +3,7 @@
 **Status:** Accepted  
 **Date:** 2026-01-20  
 **Decision Makers:** Development Team  
-**Context:** txt2json project
+**Context:** csv2json project
 
 ## Context and Problem Statement
 
@@ -26,12 +26,14 @@ Two primary language options were considered: **Python** and **Go**.
 ### Option 1: Python
 
 **Pros:**
+
 - ✅ Rapid prototyping and development
 - ✅ Rich ecosystem for data processing (pandas, csv module)
 - ✅ Easy to read and modify
 - ✅ Good for ad-hoc scripts and one-time processing
 
 **Cons:**
+
 - ❌ Requires Python runtime installation on all target systems
 - ❌ Global Interpreter Lock (GIL) limits true concurrency
 - ❌ Higher memory footprint (~50-100MB+ for simple services)
@@ -45,6 +47,7 @@ Two primary language options were considered: **Python** and **Go**.
 ### Option 2: Go
 
 **Pros:**
+
 - ✅ Compiled to single binary (no runtime dependencies)
 - ✅ Superior performance: 10-50x faster for I/O-heavy workloads
 - ✅ Low memory footprint (~10-20MB for simple services)
@@ -58,6 +61,7 @@ Two primary language options were considered: **Python** and **Go**.
 - ✅ Strong standard library for networking, file I/O, and concurrency
 
 **Cons:**
+
 - ❌ Slightly more verbose than Python
 - ❌ Steeper learning curve for developers unfamiliar with compiled languages
 - ❌ Less flexible for rapid experimentation
@@ -77,7 +81,7 @@ Since this service will run **continuously in production (24/7)**, Go is the cle
    - Lower latency (quicker response to new files)
    - More throughput (handle more files per second)
 
-2. **Resource Efficiency:** 
+2. **Resource Efficiency:**
    - 10x lower memory usage = cost savings in cloud environments
    - Predictable resource consumption over days/weeks of runtime
    - No GC pauses affecting responsiveness
@@ -107,15 +111,15 @@ Since this service will run **continuously in production (24/7)**, Go is the cle
 
 ## Performance Comparison
 
-| Metric | Python | Go | Winner |
-|--------|--------|-----|--------|
-| Startup Time | ~500ms | <50ms | Go (10x faster) |
-| Memory (Idle) | ~50MB | ~5MB | Go (10x better) |
-| File I/O Speed | Baseline | 10-50x faster | Go |
-| Concurrent Processing | Limited (GIL) | Excellent (goroutines) | Go |
-| Runtime Stability | Degrades over time | Consistent | Go |
-| Docker Image Size | ~500MB | ~15MB | Go (33x smaller) |
-| Deployment | Requires runtime | Single binary | Go |
+| Metric                | Python             | Go                     | Winner           |
+|-----------------------|--------------------|------------------------|------------------|
+| Startup Time          | ~500ms             | <50ms                  | Go (10x faster)  |
+| Memory (Idle)         | ~50MB              | ~5MB                   | Go (10x better)  |
+| File I/O Speed        | Baseline           | 10-50x faster          | Go               |
+| Concurrent Processing | Limited (GIL)      | Excellent (goroutines) | Go               |
+| Runtime Stability     | Degrades over time | Consistent             | Go               |
+| Docker Image Size     | ~500MB             | ~15MB                  | Go (33x smaller) |
+| Deployment            | Requires runtime   | Single binary          | Go               |
 
 ## Consequences
 
@@ -141,6 +145,7 @@ Since this service will run **continuously in production (24/7)**, Go is the cle
 ## When Python Would Be Better
 
 Python would be the right choice if:
+
 - Service is run ad-hoc or infrequently (not 24/7)
 - Rapid experimentation is more important than performance
 - Complex data science libraries are required (pandas, numpy, scikit-learn)

@@ -1,7 +1,7 @@
 services:
-  txt2json:
+  csv2json:
     build: .
-    container_name: txt2json-service
+    container_name: csv2json-service
     volumes:
       - ./data/input:/app/input
       - ./data/output:/app/output
@@ -22,7 +22,7 @@ services:
       - ARCHIVE_FAILED=/app/archive/failed
       - ARCHIVE_TIMESTAMP=true
       - LOG_LEVEL=INFO
-      - LOG_FILE=/app/logs/txt2json.log
+      - LOG_FILE=/app/logs/csv2json.log
       - LOG_QUEUE_MESSAGES=true
       - OUTPUT_TYPE=queue
       - QUEUE_TYPE=rabbitmq
@@ -39,7 +39,7 @@ services:
   # Optional: RabbitMQ for queue-based output
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: txt2json-rabbitmq
+    container_name: csv2json-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -53,7 +53,7 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
-    # To use RabbitMQ, update txt2json service environment:
+    # To use RabbitMQ, update csv2json service environment:
     # - OUTPUT_TYPE=queue
     # - QUEUE_TYPE=rabbitmq
     # - QUEUE_HOST=rabbitmq

@@ -1,10 +1,10 @@
 package output
 
 import (
+	"csv2json/internal/converter"
+	"csv2json/internal/parser"
 	"fmt"
 	"log"
-	"txt2json/internal/converter"
-	"txt2json/internal/parser"
 
 	"github.com/streadway/amqp"
 )

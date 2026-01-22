@@ -2,11 +2,11 @@ package converter
 
 import (
 	"bytes"
+	"csv2json/internal/parser"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"txt2json/internal/parser"
 )
 
 type Converter struct {

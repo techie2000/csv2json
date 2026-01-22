@@ -1,4 +1,4 @@
-module txt2json
+module csv2json
 
 go 1.25
 

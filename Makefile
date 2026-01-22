@@ -2,19 +2,19 @@
 
 # Build binary
 build:
-	go build -o txt2json ./cmd/txt2json
+	go build -o csv2json ./cmd/csv2json
 
 # Build with optimization
 build-release:
-	CGO_ENABLED=0 go build -ldflags="-w -s" -o txt2json ./cmd/txt2json
+	CGO_ENABLED=0 go build -ldflags="-w -s" -o csv2json ./cmd/csv2json
 
 # Run the application
 run:
-	go run ./cmd/txt2json
+	go run ./cmd/csv2json
 
 # Clean build artifacts
 clean:
-	rm -f txt2json txt2json-*
+	rm -f csv2json csv2json-*
 	go clean
 
 # Run tests
@@ -37,7 +37,7 @@ deps:
 
 # Build Docker image
 docker-build:
-	docker build -t txt2json:latest .
+	docker build -t csv2json:latest .
 
 # Run with Docker Compose
 docker-run:
@@ -49,11 +49,11 @@ docker-stop:
 
 # View logs
 logs:
-	tail -f logs/txt2json.log
+	tail -f logs/csv2json.log
 
 # Cross-compile for multiple platforms
 build-all:
-	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o txt2json-linux-amd64 ./cmd/txt2json
-	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s" -o txt2json-windows-amd64.exe ./cmd/txt2json
-	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s" -o txt2json-darwin-amd64 ./cmd/txt2json
-	GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s" -o txt2json-darwin-arm64 ./cmd/txt2json
+	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o csv2json-linux-amd64 ./cmd/csv2json
+	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s" -o csv2json-windows-amd64.exe ./cmd/csv2json
+	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s" -o csv2json-darwin-amd64 ./cmd/csv2json
+	GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s" -o csv2json-darwin-arm64 ./cmd/csv2json

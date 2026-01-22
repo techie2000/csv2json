@@ -15,7 +15,7 @@
 
 ### Modules Without Tests
 
-- `cmd/txt2json` - 0% (main entry point, no tests yet)
+- `cmd/csv2json` - 0% (main entry point, no tests yet)
 - `internal/processor` - 0% (planned - integration tests)
 
 ## Test Infrastructure

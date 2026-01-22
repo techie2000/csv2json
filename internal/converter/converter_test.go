@@ -1,12 +1,12 @@
 package converter
 
 import (
+	"csv2json/internal/parser"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"txt2json/internal/parser"
 )
 
 // TestToJSON validates JSON conversion functionality

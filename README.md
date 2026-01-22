@@ -1,4 +1,4 @@
-# txt2json - CSV/Delimited File to JSON Conversion Service
+# csv2json - CSV/Delimited File to JSON Conversion Service
 
 A high-performance, production-ready file polling service written in **Go** that monitors a directory for CSV/delimited files, validates them, converts them to JSON format, and archives files based on processing status.
 
@@ -128,7 +128,7 @@ Jane,25,designer
 | Variable             | Description                                                                      | Default                  |
 |----------------------|----------------------------------------------------------------------------------|--------------------------|
 | `LOG_LEVEL`          | Logging level (DEBUG, INFO, WARNING, ERROR)                                      | `INFO`                   |
-| `LOG_FILE`           | Log file path                                                                    | `./logs/txt2json.log`    |
+| `LOG_FILE`           | Log file path                                                                    | `./logs/csv2json.log`    |
 | `LOG_QUEUE_MESSAGES` | Log full message content when sending to queue (for visibility, queue mode only) | `false`                  |
 
 ## Installation
@@ -143,13 +143,13 @@ Jane,25,designer
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd txt2json
+cd csv2json
 
 # Download dependencies
 go mod download
 
 # Build the binary
-go build -o txt2json ./cmd/txt2json
+go build -o csv2json ./cmd/csv2json
 
 # Copy and configure environment variables
 cp .env.example .env
@@ -162,36 +162,36 @@ cp .env.example .env
 
 ```bash
 # Using environment variables from .env file
-./txt2json
+./csv2json
 
 # Or specify environment variables directly
-INPUT_FOLDER=/path/to/input OUTPUT_FOLDER=/path/to/output ./txt2json
+INPUT_FOLDER=/path/to/input OUTPUT_FOLDER=/path/to/output ./csv2json
 
 # Build and run in one command
-go run ./cmd/txt2json
+go run ./cmd/csv2json
 ```
 
 ### Cross-Platform Compilation
 
 ```bash
 # Build for Linux
-GOOS=linux GOARCH=amd64 go build -o txt2json-linux ./cmd/txt2json
+GOOS=linux GOARCH=amd64 go build -o csv2json-linux ./cmd/csv2json
 
 # Build for Windows
-GOOS=windows GOARCH=amd64 go build -o txt2json.exe ./cmd/txt2json
+GOOS=windows GOARCH=amd64 go build -o csv2json.exe ./cmd/csv2json
 
 # Build for macOS
-GOOS=darwin GOARCH=amd64 go build -o txt2json-mac ./cmd/txt2json
+GOOS=darwin GOARCH=amd64 go build -o csv2json-mac ./cmd/csv2json
 ```
 
 ### Docker
 
 ```bash
 # Build image
-docker build -t txt2json .
+docker build -t csv2json .
 
 # Run container
-docker run -v /host/input:/app/input -v /host/output:/app/output txt2json
+docker run -v /host/input:/app/input -v /host/output:/app/output csv2json
 ```
 
 ## Examples
@@ -266,7 +266,7 @@ docker run -d --name rabbitmq \
 ## Project Structure
 
 ```text
-txt2json/
+csv2json/
 ├── src/
 │   ├── __init__.py
 │   ├── main.py              # Service entry point
