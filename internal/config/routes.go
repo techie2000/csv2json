@@ -39,9 +39,9 @@ type ParsingConfig struct {
 
 // OutputConfig defines destination and type
 type OutputConfig struct {
-	Type                string `json:"type"` // "file" or "queue"
-	Destination         string `json:"destination"`
-	IncludeRouteContext bool   `json:"includeRouteContext"` // Default: true
+	Type                string  `json:"type"` // "file" or "queue"
+	Destination         string  `json:"destination"`
+	IncludeRouteContext *bool   `json:"includeRouteContext,omitempty"` // Pointer to distinguish between unset and false
 }
 
 // ArchiveConfig defines archive paths
@@ -109,6 +109,11 @@ func LoadRoutes(configPath string) (*RoutesConfig, error) {
 		}
 		if route.Parsing.Encoding == "" {
 			route.Parsing.Encoding = "utf-8"
+		}
+		// Default includeRouteContext to true for queue output (nil = not explicitly set)
+		if route.Output.Type == "queue" && route.Output.IncludeRouteContext == nil {
+			defaultTrue := true
+			route.Output.IncludeRouteContext = &defaultTrue
 		}
 
 		// Compile filename pattern if specified

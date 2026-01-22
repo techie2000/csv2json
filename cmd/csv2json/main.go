@@ -162,7 +162,11 @@ func runMultiIngressMode(routesConfigPath string) {
 
 		// Set route context if using queue output
 		if route.Output.Type == "queue" {
-			proc.SetRouteName(route.Name, route.Output.IncludeRouteContext)
+			includeContext := true // Default
+			if route.Output.IncludeRouteContext != nil {
+				includeContext = *route.Output.IncludeRouteContext
+			}
+			proc.SetRouteName(route.Name, includeContext)
 		}
 
 		processors = append(processors, proc)
