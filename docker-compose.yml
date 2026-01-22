@@ -10,7 +10,9 @@ services:
     environment:
       - INPUT_FOLDER=/app/input
       - OUTPUT_FOLDER=/app/output
+      - WATCH_MODE=hybrid
       - POLL_INTERVAL_SECONDS=5
+      - HYBRID_POLL_INTERVAL_SECONDS=10
       - MAX_FILES_PER_POLL=50
       - FILE_SUFFIX_FILTER=.csv
       - DELIMITER=,

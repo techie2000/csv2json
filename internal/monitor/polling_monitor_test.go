@@ -36,54 +36,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestScanExisting(t *testing.T) {
-	tempDir := t.TempDir()
-
-	// Create some existing files
-	existingFiles := []string{"file1.csv", "file2.csv", "file3.csv"}
-	for _, filename := range existingFiles {
-		filePath := filepath.Join(tempDir, filename)
-		if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-			t.Fatalf("Failed to create test file: %v", err)
-		}
-	}
-
-	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
-	m.scanExisting()
-
-	if len(m.processedFiles) != len(existingFiles) {
-		t.Errorf("Expected %d processed files, got %d", len(existingFiles), len(m.processedFiles))
-	}
-
-	for _, filename := range existingFiles {
-		if !m.processedFiles[filename] {
-			t.Errorf("File '%s' should be marked as processed", filename)
-		}
-	}
-}
-
-func TestScanExisting_IgnoresDirs(t *testing.T) {
-	tempDir := t.TempDir()
-
-	// Create files and directories
-	if err := os.WriteFile(filepath.Join(tempDir, "file.csv"), []byte("test"), 0644); err != nil {
-		t.Fatalf("Failed to create file: %v", err)
-	}
-	if err := os.MkdirAll(filepath.Join(tempDir, "subdir"), 0755); err != nil {
-		t.Fatalf("Failed to create directory: %v", err)
-	}
-
-	m := NewPollingMonitor(tempDir, 1*time.Second, 10)
-	m.scanExisting()
-
-	if len(m.processedFiles) != 1 {
-		t.Errorf("Expected 1 processed file, got %d", len(m.processedFiles))
-	}
-
-	if !m.processedFiles["file.csv"] {
-		t.Error("file.csv should be marked as processed")
-	}
-}
+// TestScanExisting and TestScanExisting_IgnoresDirs removed
+// as scanExisting() method was removed - all files in input folder should be processed
 
 func TestMaxFilesPerPoll(t *testing.T) {
 	tempDir := t.TempDir()

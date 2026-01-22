@@ -115,37 +115,41 @@ All configuration is managed through environment variables. The service supports
 
 ### Input Settings
 
-| Variable                        | Description                                                  | Default          |
-|---------------------------------|--------------------------------------------------------------|------------------|
-| `INPUT_FOLDER`                  | Directory to monitor for incoming files                      | `./input`        |
+| Variable                        | Description                                                       | Default          |
+|---------------------------------|-------------------------------------------------------------------|------------------|
+| `INPUT_FOLDER`                  | Directory to monitor for incoming files                           | `./input`        |
 | `WATCH_MODE`                    | File detection strategy: `event`, `poll`, or `hybrid` (see below) | `event`          |
-| `POLL_INTERVAL_SECONDS`         | Seconds between folder polls (poll/hybrid modes)             | `5`              |
-| `HYBRID_POLL_INTERVAL_SECONDS`  | Backup polling interval for hybrid mode                      | `60`             |
-| `MAX_FILES_PER_POLL`            | Maximum files to process per poll cycle (0 = no limit)       | `50`             |
-| `FILE_SUFFIX_FILTER`            | Comma-separated file suffixes to process (e.g., `.csv,.txt`) | `*` (all files)  |
-| `FILENAME_PATTERN`              | Regex pattern for filename matching                          | `.*` (all files) |
+| `POLL_INTERVAL_SECONDS`         | Seconds between folder polls (poll/hybrid modes)                  | `5`              |
+| `HYBRID_POLL_INTERVAL_SECONDS`  | Backup polling interval for hybrid mode                           | `60`             |
+| `MAX_FILES_PER_POLL`            | Maximum files to process per poll cycle (0 = no limit)            | `50`             |
+| `FILE_SUFFIX_FILTER`            | Comma-separated file suffixes to process (e.g., `.csv,.txt`)      | `*` (all files)  |
+| `FILENAME_PATTERN`              | Regex pattern for filename matching                               | `.*` (all files) |
 
 #### Watch Modes (ADR-005)
 
 **Event Mode** (default, recommended):
+
 - Uses OS-level file system notifications (inotify/FSEvents/ReadDirectoryChangesW)
 - Immediate detection (typically <100ms)
 - Zero CPU overhead when idle
 - Automatically falls back to polling if events unavailable
 
 **Poll Mode** (legacy compatibility):
+
 - Time-based folder scanning
 - Compatible with all file systems (NFS, SMB, cloud mounts)
 - Higher latency (5+ seconds)
 - Continuous CPU usage
 
 **Hybrid Mode** (maximum reliability):
+
 - Primary: Event-driven monitoring
 - Backup: Periodic polling (default 60s)
 - Best for critical systems requiring redundancy
 - Catches events that fsnotify might miss
 
 **Linux inotify Limits**: If monitoring many routes, you may need to increase system limits:
+
 ```bash
 # Check current limit
 cat /proc/sys/fs/inotify/max_user_watches
@@ -370,6 +374,7 @@ Invoke-WebRequest -Uri "https://github.com/techie2000/csv2json/releases/latest/d
 ```
 
 **Verify checksums:**
+
 ```bash
 curl -LO https://github.com/techie2000/csv2json/releases/latest/download/csv2json-linux-amd64.sha256
 sha256sum -c csv2json-linux-amd64.sha256
@@ -391,9 +396,12 @@ docker run -v ./data/input:/app/input -v ./data/output:/app/output ghcr.io/techi
 docker-compose up -d
 ```
 
+**Important for Docker/Windows users:** File system events don't propagate reliably from Windows hosts through Docker volume mounts. Set `WATCH_MODE=hybrid` in your docker-compose.yml or add `-e WATCH_MODE=hybrid` to docker run commands to enable backup polling.
+
 ### Option 3: Build from Source
 
 **Prerequisites:**
+
 - Go 1.25 or later
 - Git
 
@@ -648,6 +656,7 @@ For security policies, vulnerability reporting, and security scanning informatio
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes, features, and fixes for each version.
 
 **Latest Release:** v0.2.0 (2026-01-22)
+
 - Multi-ingress routing architecture
 - Event-driven file detection (<100ms latency)
 - Comprehensive CLI documentation

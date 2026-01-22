@@ -39,9 +39,6 @@ func NewEventMonitor(watchFolder string, maxFilesPerPoll int) (*EventMonitor, er
 func (m *EventMonitor) Start(callback FileCallback) error {
 	m.running = true
 
-	// Initial scan to mark existing files as processed
-	m.scanExisting()
-
 	// Add watch on the folder
 	if err := m.watcher.Add(m.watchFolder); err != nil {
 		log.Printf("Failed to add watch on %s: %v", m.watchFolder, err)
@@ -83,22 +80,6 @@ func (m *EventMonitor) Stop() {
 		close(m.stopChan)
 		m.running = false
 	}
-}
-
-func (m *EventMonitor) scanExisting() {
-	entries, err := os.ReadDir(m.watchFolder)
-	if err != nil {
-		log.Printf("Warning: unable to scan watch folder: %v", err)
-		return
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			m.processedFiles[entry.Name()] = true
-		}
-	}
-
-	log.Printf("Found %d existing files (will not process)", len(m.processedFiles))
 }
 
 func (m *EventMonitor) handleFileEvent(filePath string, callback FileCallback) {

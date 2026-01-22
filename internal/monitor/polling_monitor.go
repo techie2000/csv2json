@@ -34,9 +34,6 @@ func NewPollingMonitor(watchFolder string, pollInterval time.Duration, maxFilesP
 func (m *PollingMonitor) Start(callback FileCallback) error {
 	m.running = true
 
-	// Initial scan to mark existing files as processed
-	m.scanExisting()
-
 	log.Printf("Polling-based file monitor started. Polling every %v", m.pollInterval)
 
 	ticker := time.NewTicker(m.pollInterval)
@@ -61,22 +58,6 @@ func (m *PollingMonitor) Stop() {
 		close(m.stopChan)
 		m.running = false
 	}
-}
-
-func (m *PollingMonitor) scanExisting() {
-	entries, err := os.ReadDir(m.watchFolder)
-	if err != nil {
-		log.Printf("Warning: unable to scan watch folder: %v", err)
-		return
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			m.processedFiles[entry.Name()] = true
-		}
-	}
-
-	log.Printf("Found %d existing files (will not process)", len(m.processedFiles))
 }
 
 func (m *PollingMonitor) scan(callback FileCallback) error {
