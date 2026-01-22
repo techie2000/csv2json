@@ -39,9 +39,10 @@ jobs:
           severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-repo-results.sarif'
+          category: 'trivy-repo-scan'
 
       - name: Build Docker image
         run: docker build -t csv2json:latest .
@@ -55,9 +56,10 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Docker scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-image-results.sarif'
+          category: 'trivy-docker-scan'
 
       - name: Run Trivy for issue creation
         id: trivy-check
