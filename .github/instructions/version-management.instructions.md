@@ -197,17 +197,17 @@ Docker images are automatically built and pushed to GitHub Container Registry wh
 
 **Using Published Images:**
 ```bash
-# Pull specific version
-docker pull ghcr.io/techie2000/csv2json:v0.2.0
+# Pull specific version (replace 'yourusername' with your GitHub username)
+docker pull ghcr.io/yourusername/csv2json:v0.2.0
 
 # Pull latest
-docker pull ghcr.io/techie2000/csv2json:latest
+docker pull ghcr.io/yourusername/csv2json:latest
 
 # Pull major version (gets latest minor/patch)
-docker pull ghcr.io/techie2000/csv2json:0
+docker pull ghcr.io/yourusername/csv2json:0
 
 # Run with Docker
-docker run -v ./data:/app/input ghcr.io/techie2000/csv2json:latest
+docker run -v ./data:/app/input ghcr.io/yourusername/csv2json:latest
 ```
 
 **Note:** First time pushing to ghcr.io, you may need to make the package public in GitHub settings:

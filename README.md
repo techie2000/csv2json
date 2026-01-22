@@ -378,14 +378,14 @@ sha256sum -c csv2json-linux-amd64.sha256
 ### Option 2: Docker (Pre-built Images)
 
 ```bash
-# Pull from GitHub Container Registry
-docker pull ghcr.io/techie2000/csv2json:latest
+# Pull from GitHub Container Registry (replace 'yourusername' with your GitHub username)
+docker pull ghcr.io/yourusername/csv2json:latest
 
 # Or use a specific version
-docker pull ghcr.io/techie2000/csv2json:v0.2.0
+docker pull ghcr.io/yourusername/csv2json:v0.2.0
 
 # Run with Docker
-docker run -v ./data/input:/app/input -v ./data/output:/app/output ghcr.io/techie2000/csv2json:latest
+docker run -v ./data/input:/app/input -v ./data/output:/app/output ghcr.io/yourusername/csv2json:latest
 
 # Or use docker-compose (from repository)
 docker-compose up -d
