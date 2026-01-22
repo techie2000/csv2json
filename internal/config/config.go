@@ -17,13 +17,13 @@ type Config struct {
 	RoutesConfigPath string // Path to routes.json (if using multi-ingress mode)
 
 	// Input settings
-	InputFolder           string
-	PollInterval          time.Duration
-	MaxFilesPerPoll       int
-	FileSuffixFilter      []string
-	FilenamePattern       *regexp.Regexp
-	WatchMode             string // "event", "poll", or "hybrid"
-	HybridPollInterval    time.Duration
+	InputFolder        string
+	PollInterval       time.Duration
+	MaxFilesPerPoll    int
+	FileSuffixFilter   []string
+	FilenamePattern    *regexp.Regexp
+	WatchMode          string // "event", "poll", or "hybrid"
+	HybridPollInterval time.Duration
 
 	// Parsing settings
 	Delimiter rune
@@ -67,24 +67,24 @@ func Load() (*Config, error) {
 		MaxFilesPerPoll:    getIntEnv("MAX_FILES_PER_POLL", 0), // 0 = no limit
 		WatchMode:          getEnv("WATCH_MODE", "event"),
 		Delimiter:          rune(getEnv("DELIMITER", ",")[0]),
-		QuoteChar:        rune(getEnv("QUOTECHAR", "\"")[0]),
-		Encoding:         getEnv("ENCODING", "utf-8"),
-		HasHeader:        getBoolEnv("HAS_HEADER", true),
-		OutputType:       getEnv("OUTPUT_TYPE", "file"),
-		OutputFolder:     getEnv("OUTPUT_FOLDER", "./output"),
-		QueueType:        getEnv("QUEUE_TYPE", "rabbitmq"),
-		QueueHost:        getEnv("QUEUE_HOST", "localhost"),
-		QueuePort:        getIntEnv("QUEUE_PORT", 5672),
-		QueueName:        getEnv("QUEUE_NAME", ""),
-		QueueUsername:    getEnv("QUEUE_USERNAME", ""),
-		QueuePassword:    getEnv("QUEUE_PASSWORD", ""),
-		ArchiveProcessed: getEnv("ARCHIVE_PROCESSED", "./archive/processed"),
-		ArchiveIgnored:   getEnv("ARCHIVE_IGNORED", "./archive/ignored"),
-		ArchiveFailed:    getEnv("ARCHIVE_FAILED", "./archive/failed"),
-		ArchiveTimestamp: getBoolEnv("ARCHIVE_TIMESTAMP", true),
-		LogLevel:         getEnv("LOG_LEVEL", "INFO"),
-		LogFile:          getEnv("LOG_FILE", "./logs/csv2json.log"),
-		LogQueueMessages: getBoolEnv("LOG_QUEUE_MESSAGES", false),
+		QuoteChar:          rune(getEnv("QUOTECHAR", "\"")[0]),
+		Encoding:           getEnv("ENCODING", "utf-8"),
+		HasHeader:          getBoolEnv("HAS_HEADER", true),
+		OutputType:         getEnv("OUTPUT_TYPE", "file"),
+		OutputFolder:       getEnv("OUTPUT_FOLDER", "./output"),
+		QueueType:          getEnv("QUEUE_TYPE", "rabbitmq"),
+		QueueHost:          getEnv("QUEUE_HOST", "localhost"),
+		QueuePort:          getIntEnv("QUEUE_PORT", 5672),
+		QueueName:          getEnv("QUEUE_NAME", ""),
+		QueueUsername:      getEnv("QUEUE_USERNAME", ""),
+		QueuePassword:      getEnv("QUEUE_PASSWORD", ""),
+		ArchiveProcessed:   getEnv("ARCHIVE_PROCESSED", "./archive/processed"),
+		ArchiveIgnored:     getEnv("ARCHIVE_IGNORED", "./archive/ignored"),
+		ArchiveFailed:      getEnv("ARCHIVE_FAILED", "./archive/failed"),
+		ArchiveTimestamp:   getBoolEnv("ARCHIVE_TIMESTAMP", true),
+		LogLevel:           getEnv("LOG_LEVEL", "INFO"),
+		LogFile:            getEnv("LOG_FILE", "./logs/csv2json.log"),
+		LogQueueMessages:   getBoolEnv("LOG_QUEUE_MESSAGES", false),
 	}
 
 	// Parse file suffix filter

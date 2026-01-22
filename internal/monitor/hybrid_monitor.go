@@ -11,13 +11,13 @@ import (
 
 // HybridMonitor combines event-driven and polling strategies
 type HybridMonitor struct {
-	watchFolder      string
-	pollInterval     time.Duration
-	maxFilesPerPoll  int
-	processedFiles   map[string]bool
-	running          bool
-	stopChan         chan struct{}
-	watcher          *fsnotify.Watcher
+	watchFolder     string
+	pollInterval    time.Duration
+	maxFilesPerPoll int
+	processedFiles  map[string]bool
+	running         bool
+	stopChan        chan struct{}
+	watcher         *fsnotify.Watcher
 }
 
 // NewHybridMonitor creates a hybrid monitor with event-driven primary and polling backup

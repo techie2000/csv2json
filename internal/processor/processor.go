@@ -18,7 +18,7 @@ type Processor struct {
 	archiver  *archiver.Archiver
 	output    output.Handler
 	monitor   monitor.FileMonitor // Changed from *monitor.Monitor to interface
-	routeName string               // Optional route name for multi-ingress mode
+	routeName string              // Optional route name for multi-ingress mode
 }
 
 func New(cfg *config.Config) (*Processor, error) {

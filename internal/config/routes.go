@@ -23,8 +23,8 @@ type InputConfig struct {
 	Path                  string `json:"path"`
 	FilenamePattern       string `json:"filenamePattern,omitempty"`
 	SuffixFilter          string `json:"suffixFilter,omitempty"`
-	WatchMode             string `json:"watchMode,omitempty"`              // "event", "poll", or "hybrid"
-	PollIntervalSec       int    `json:"pollIntervalSeconds,omitempty"`    // Used in poll/hybrid modes
+	WatchMode             string `json:"watchMode,omitempty"`                 // "event", "poll", or "hybrid"
+	PollIntervalSec       int    `json:"pollIntervalSeconds,omitempty"`       // Used in poll/hybrid modes
 	HybridPollIntervalSec int    `json:"hybridPollIntervalSeconds,omitempty"` // Backup polling in hybrid mode
 	MaxFilesPerPoll       int    `json:"maxFilesPerPoll,omitempty"`
 	compiledPattern       *regexp.Regexp
@@ -175,13 +175,13 @@ func (r *Route) ToLegacyConfig() *Config {
 		WatchMode:          r.Input.WatchMode,
 		FilenamePattern:    r.Input.compiledPattern,
 		Delimiter:          delimiter,
-		QuoteChar:        quoteChar,
-		Encoding:         r.Parsing.Encoding,
-		HasHeader:        r.Parsing.HasHeader,
-		ArchiveProcessed: r.Archive.ProcessedPath,
-		ArchiveIgnored:   r.Archive.IgnoredPath,
-		ArchiveFailed:    r.Archive.FailedPath,
-		ArchiveTimestamp: true, // Always timestamp in routing mode
+		QuoteChar:          quoteChar,
+		Encoding:           r.Parsing.Encoding,
+		HasHeader:          r.Parsing.HasHeader,
+		ArchiveProcessed:   r.Archive.ProcessedPath,
+		ArchiveIgnored:     r.Archive.IgnoredPath,
+		ArchiveFailed:      r.Archive.FailedPath,
+		ArchiveTimestamp:   true, // Always timestamp in routing mode
 	}
 
 	// Parse suffix filter
