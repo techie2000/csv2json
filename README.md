@@ -35,7 +35,7 @@ A high-performance, production-ready file polling service written in **Go** that
 ### Legacy Single-Input Mode
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Input Folder] --> B[File Detection]
     B --> C{Should Process?}
     C -->|No - Filter Mismatch| D1[Archive: Ignored]
@@ -50,10 +50,10 @@ flowchart LR
     I --> K[Archive: Processed]
     J --> K
     
-    style A fill:#e1f5ff
-    style K fill:#d4edda
-    style D1 fill:#fff3cd
-    style D2 fill:#f8d7da
+    style A fill:#4a9eff,stroke:#333,stroke-width:2px,color:#000
+    style K fill:#5cb85c,stroke:#333,stroke-width:2px,color:#fff
+    style D1 fill:#f0ad4e,stroke:#333,stroke-width:2px,color:#000
+    style D2 fill:#d9534f,stroke:#333,stroke-width:2px,color:#fff
 ```
 
 ### Multi-Ingress Routing Mode (ADR-004)
@@ -80,12 +80,12 @@ flowchart TB
     P2 --> Q2[orders_queue<br/>with route context]
     P3 --> F[File Output]
     
-    style R1 fill:#e1f5ff
-    style R2 fill:#e1f5ff
-    style R3 fill:#e1f5ff
-    style Q1 fill:#d4edda
-    style Q2 fill:#d4edda
-    style F fill:#d4edda
+    style R1 fill:#4a9eff,stroke:#333,stroke-width:2px,color:#000
+    style R2 fill:#4a9eff,stroke:#333,stroke-width:2px,color:#000
+    style R3 fill:#4a9eff,stroke:#333,stroke-width:2px,color:#000
+    style Q1 fill:#5cb85c,stroke:#333,stroke-width:2px,color:#fff
+    style Q2 fill:#5cb85c,stroke:#333,stroke-width:2px,color:#fff
+    style F fill:#5cb85c,stroke:#333,stroke-width:2px,color:#fff
 ```
 
 ### Component Flow
@@ -563,23 +563,52 @@ docker run -d --name rabbitmq \
 
 ```text
 csv2json/
-├── src/
-│   ├── __init__.py
-│   ├── main.py              # Service entry point
-│   ├── config.py            # Configuration management
-│   ├── file_monitor.py      # File polling logic
-│   ├── parser.py            # CSV/delimited file parser
-│   ├── converter.py         # JSON conversion
-│   ├── output_handler.py    # Output (file/queue) management
-│   └── archiver.py          # File archiving
-├── tests/
-│   ├── test_parser.py
-│   ├── test_converter.py
-│   └── test_archiver.py
+├── cmd/
+│   └── csv2json/
+│       └── main.go          # Service entry point
+├── internal/
+│   ├── archiver/
+│   │   ├── archiver.go      # File archiving
+│   │   └── archiver_test.go
+│   ├── config/
+│   │   ├── config.go        # Configuration management
+│   │   └── config_test.go
+│   ├── converter/
+│   │   ├── converter.go     # JSON conversion
+│   │   └── converter_test.go
+│   ├── monitor/
+│   │   ├── event_monitor.go # fsnotify-based monitoring
+│   │   ├── polling_monitor.go # Time-based polling
+│   │   ├── hybrid_monitor.go # Event + polling backup
+│   │   └── *_test.go
+│   ├── output/
+│   │   ├── file_handler.go  # File output
+│   │   ├── queue_handler.go # RabbitMQ output
+│   │   ├── output.go        # Handler factory & BothHandler
+│   │   └── *_test.go
+│   ├── parser/
+│   │   ├── parser.go        # CSV/delimited file parser
+│   │   └── parser_test.go
+│   └── processor/
+│       └── processor.go     # Main processing orchestration
+├── data/
+│   ├── input/               # File drop location
+│   ├── output/              # JSON output files
+│   ├── archive/
+│   │   ├── processed/
+│   │   ├── ignored/
+│   │   └── failed/
+│   └── logs/
+├── docs/
+│   ├── adrs/                # Architecture Decision Records
+│   └── SECURITY.md
+├── testdata/                # Test fixtures
 ├── .env.example             # Example environment configuration
-├── requirements.txt         # Python dependencies
+├── go.mod                   # Go module dependencies
+├── go.sum                   # Dependency checksums
 ├── Dockerfile               # Container definition
 ├── docker-compose.yml       # Multi-container setup
+├── Makefile                 # Build automation
 └── README.md                # This file
 ```
 
