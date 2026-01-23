@@ -12,8 +12,8 @@
 go.work
 
 # Build output
-txt2json
-txt2json-*
+csv2json
+csv2json-*
 /bin/
 /dist/
 

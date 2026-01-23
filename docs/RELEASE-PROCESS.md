@@ -23,6 +23,7 @@ git push origin v0.3.0
 ```
 
 **That's it!** GitHub Actions will automatically:
+
 - ✅ Build binaries for all platforms
 - ✅ Generate SHA256 checksums
 - ✅ Create GitHub Release with CHANGELOG notes
@@ -33,6 +34,7 @@ git push origin v0.3.0
 ## What Gets Built Automatically
 
 ### Binaries (5 platforms)
+
 - `csv2json-linux-amd64` + `.sha256`
 - `csv2json-linux-arm64` + `.sha256`
 - `csv2json-windows-amd64.exe` + `.sha256`
@@ -40,6 +42,7 @@ git push origin v0.3.0
 - `csv2json-darwin-arm64` + `.sha256`
 
 ### Docker Images (multi-arch)
+
 - `ghcr.io/techie2000/csv2json:v0.3.0`
 - `ghcr.io/techie2000/csv2json:0.3`
 - `ghcr.io/techie2000/csv2json:0`
@@ -48,21 +51,22 @@ git push origin v0.3.0
 
 ## Monitoring the Release
 
-1. **GitHub Actions**: https://github.com/techie2000/csv2json/actions
+1. **GitHub Actions**: <https://github.com/techie2000/csv2json/actions>
    - Watch the "Release" workflow
    - Typically completes in 5-10 minutes
 
-2. **GitHub Releases**: https://github.com/techie2000/csv2json/releases
+2. **GitHub Releases**: <https://github.com/techie2000/csv2json/releases>
    - Release should appear with binaries attached
    - Release notes extracted from CHANGELOG.md
 
-3. **Docker Images**: https://github.com/techie2000/csv2json/pkgs/container/csv2json
+3. **Docker Images**: <https://github.com/techie2000/csv2json/pkgs/container/csv2json>
    - Images should appear with version tags
    - First time: May need to make package public in settings
 
 ## Testing the Release
 
 ### Test Binaries
+
 ```bash
 # Download
 curl -LO https://github.com/techie2000/csv2json/releases/download/v0.3.0/csv2json-linux-amd64
@@ -77,6 +81,7 @@ chmod +x csv2json-linux-amd64
 ```
 
 ### Test Docker Image
+
 ```bash
 # Pull
 docker pull ghcr.io/techie2000/csv2json:v0.3.0
@@ -114,6 +119,7 @@ git push origin :refs/tags/v0.3.0
 ## Troubleshooting
 
 ### Release workflow failed
+
 - Check GitHub Actions logs for errors
 - Common issues:
   - CHANGELOG.md format incorrect (can't extract release notes)
@@ -121,10 +127,12 @@ git push origin :refs/tags/v0.3.0
   - Docker build failures
 
 ### Docker images not appearing
+
 - First release to ghcr.io? Package may be private by default
 - Go to: Settings → Packages → csv2json → Change visibility → Public
 
 ### Binaries missing architecture
+
 - Check the build matrix in `.github/workflows/release.yml`
 - Ensure GOOS/GOARCH combinations are valid
 
@@ -137,6 +145,7 @@ Follow [Semantic Versioning](https://semver.org/):
 - **PATCH** (0.0.X): Bug fixes (backward compatible)
 
 Examples:
+
 - Bug fix: `0.2.0` → `0.2.1`
 - New feature: `0.2.1` → `0.3.0`
 - Breaking change: `0.3.0` → `1.0.0`

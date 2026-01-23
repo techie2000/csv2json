@@ -1,14 +1,6 @@
-# GitHub Copilot Configuration Template
+# GitHub Copilot Configuration for csv2json
 
-This is a **template repository** for GitHub Copilot customization assets, designed to be cloned and adapted for new projects. The base collection is sourced from [github/awesome-copilot](https://github.com/github/awesome-copilot), providing a comprehensive starting point for AI-assisted development.
-
-## Using This Template
-
-1. **Clone this repository** as the foundation for your new project
-2. **Remove unused instructions** that don't apply to your tech stack
-3. **Customize remaining instructions** with project-specific patterns and conventions
-4. **Add project-specific context** to agents and prompts
-5. **Keep `.github/` structure** intact for proper Copilot integration
+This repository uses GitHub Copilot custom instructions, agents, and prompts to maintain code quality and consistency. The configuration has been tailored specifically for this Go-based CSV to JSON conversion service.
 
 ## Project Standards
 
@@ -195,43 +187,39 @@ stateDiagram-v2
 ## Key Components
 
 ### Instructions (`instructions/*.instructions.md`)
-Language and framework-specific coding standards that AI applies when generating or reviewing code:
-- **Language-specific**: `java.instructions.md`, `nodejs-javascript-vitest.instructions.md`, `python.instructions.md`, `go.instructions.md`, `rust.instructions.md`, `shell.instructions.md`
-- **Framework-specific**: `angular.instructions.md`, `nextjs.instructions.md`
-- **Cross-cutting**: `security-and-owasp.instructions.md`, `performance-optimization.instructions.md`, `containerization-docker-best-practices.instructions.md`
+Coding standards that AI applies when generating or reviewing code:
+- **Language-specific**: `go.instructions.md` - Go idioms and best practices
+- **Cross-cutting**: 
+  - `security-and-owasp.instructions.md` - Security best practices
+  - `performance-optimization.instructions.md` - Performance guidelines
+  - `containerization-docker-best-practices.instructions.md` - Docker optimization
+  - `github-actions-ci-cd-best-practices.instructions.md` - CI/CD patterns
+- **Code Quality**:
+  - `code-review-generic.instructions.md` - General code review standards
+  - `self-explanatory-code-commenting.instructions.md` - Comment guidelines
+  - `test-driven-maintenance.instructions.md` - Test requirements
+- **Documentation**:
+  - `markdown.instructions.md` - Documentation standards
+  - `update-docs-on-code-change.instructions.md` - Keep docs in sync
+  - `version-management.instructions.md` - Release process
 
 Each instruction file includes:
-- YAML frontmatter with `applyTo` glob patterns (e.g., `**/*.java`)
+- YAML frontmatter with `applyTo` glob patterns (e.g., `**/*.go`)
 - Actionable guidelines, not generic advice
 - Real code examples demonstrating patterns
 - Anti-patterns to avoid
 
 ### Agents (`agents/*.agent.md`)
 Specialized AI personas for complex workflows:
-- **`modernization.agent.md`**: Comprehensive 9-step modernization workflow for legacy systems
-- **`openapi-to-application.agent.md`**: Generate production-ready apps from OpenAPI specs
-- **`se-security-reviewer.agent.md`**: OWASP Top 10 security analysis
-- **`blueprint-mode-codex.agent.md`**: Structured workflow selection (Loop/Debug/Express/Main)
-
-Agents follow a structured format:
-```yaml
----
-name: 'Agent Name'
-description: 'Brief description'
-model: 'GPT-4.1' or 'Claude Sonnet 4'
-tools: ['codebase', 'edit/editFiles', 'search/codebase']
----
-```
+- **`adr-generator.agent.md`**: Generate Architecture Decision Records
+- **`devops-expert.agent.md`**: DevOps and infrastructure guidance
+- **`go-mcp-expert.agent.md`**: Go Model Context Protocol expertise
 
 ### Prompts (`prompts/*.prompt.md`)
 Reusable templates for common tasks:
-- **Architecture**: `architecture-blueprint-generator.prompt.md`, `create-architectural-decision-record.prompt.md`
-- **Code Generation**: `openapi-to-application-code.prompt.md`, `convert-plaintext-to-md.prompt.md`
-- **Documentation**: `readme-blueprint-generator.prompt.md`, `create-llms.prompt.md`, `folder-structure-blueprint-generator.prompt.md`
-- **Code Quality**: `review-and-refactor.prompt.md`, `sql-code-review.prompt.md`, `postgresql-code-review.prompt.md`
-- **Project Management**: `create-github-issues-feature-from-implementation-plan.prompt.md`
-
-Prompts use YAML frontmatter to specify required tools and models.
+- **`create-architectural-decision-record.prompt.md`**: ADR creation workflow
+- **`review-and-refactor.prompt.md`**: Comprehensive code review
+- **`create-llms.prompt.md`**: Generate llms.txt documentation index
 
 ### Skills (`skills/*/SKILL.md`)
 Modular domain knowledge packages that AI can load on-demand:
@@ -270,51 +258,6 @@ Modular domain knowledge packages that AI can load on-demand:
 - **Skills**: `skills/[skill-name]/SKILL.md` with supporting `references/` folder
 
 ## Special Instructions
-
-### Memory Bank System
-This repository uses a "Memory Bank" pattern (see `memory-bank.instructions.md`):
-- Core files: `projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`
-- Task tracking in `tasks/` folder with `_index.md` master list
-- AI agents maintain context across sessions using these files
-
-### Workflow Modes
-Several instructions define specialized modes:
-- **TaskSync V4** (`tasksync.instructions.md`): Terminal-driven continuous task execution
-- **Spec-Driven Workflow** (`spec-driven-workflow-v1.instructions.md`): 6-phase loop (Analyze → Design → Implement → Validate → Reflect → Handoff)
-- **Blueprint Mode** (`blueprint-mode-codex.agent.md`): Adaptive workflow selection
-
-### Code Review Emphasis
-Multiple layers of code review guidance:
-- Generic code review checklist: `code-review-generic.instructions.md`
-- Language-specific review rules embedded in each language instruction file
-- SQL-specific reviews: `sql-code-review.prompt.md`, `postgresql-code-review.prompt.md`
-- Security focus: `security-and-owasp.instructions.md`, `se-security-reviewer.agent.md`
-
-## Important Patterns
-
-### Configurable Instructions
-Many instruction files use conditional sections:
-```markdown
-If `apply-doc-file-structure == true`, then apply the following section.
-```
-
-### EARS Notation for Requirements
-`spec-driven-workflow-v1.instructions.md` uses EARS (Easy Approach to Requirements Syntax):
-- `WHEN [trigger] THE SYSTEM SHALL [behavior]`
-- Ensures testable, unambiguous requirements
-
-### Self-Explanatory Code
-`self-explanatory-code-commenting.instructions.md` emphasizes:
-- Code that speaks for itself
-- Comments only for WHY, not WHAT
-- Specific annotation types: `TODO`, `FIXME`, `HACK`, `NOTE`, `WARNING`, `PERF`, `SECURITY`, `BUG`, `REFACTOR`, `DEPRECATED`
-
-### Documentation Updates
-`update-docs-on-code-change.instructions.md` triggers automatic documentation updates when code changes affect:
-- Public APIs
-- Configuration options
-- CLI commands
-- Installation/setup steps
 
 ### Configuration Consistency (CRITICAL)
 When adding, removing, or modifying environment variables:

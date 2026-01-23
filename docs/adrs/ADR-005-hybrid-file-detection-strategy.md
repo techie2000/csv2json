@@ -11,6 +11,7 @@
 The current implementation uses **time-based polling** (default 5 seconds) to detect new files. While simple and universally compatible, polling has significant drawbacks:
 
 **Current Pain Points:**
+
 - **Latency**: 5-second delay before file detection (or more if poll interval is increased)
 - **Resource Waste**: Continuous CPU cycles checking empty directories
 - **Not Scalable**: Higher polling frequency increases CPU load
@@ -18,6 +19,7 @@ The current implementation uses **time-based polling** (default 5 seconds) to de
 
 **Modern Reality:**
 All major operating systems support **event-based file notifications**:
+
 - **Linux**: inotify
 - **macOS**: FSEvents
 - **Windows**: ReadDirectoryChangesW
@@ -40,12 +42,14 @@ Should we evolve from time-based polling to event-driven file detection, while m
 ### Option 1: Keep Polling-Only (Current)
 
 **Pros:**
+
 - Simple implementation
 - Works everywhere (local, NFS, SMB, cloud storage)
 - Predictable resource usage
 - Easy to reason about
 
 **Cons:**
+
 - Fixed latency (5+ seconds)
 - Continuous CPU usage even when idle
 - Not scalable with high file volumes
@@ -54,12 +58,14 @@ Should we evolve from time-based polling to event-driven file detection, while m
 ### Option 2: Event-Only (Replace Polling)
 
 **Pros:**
+
 - Immediate detection (sub-second)
 - Zero CPU when idle
 - Highly scalable
 - Modern and efficient
 
 **Cons:**
+
 - **BREAKS network file systems**: NFS/SMB often don't support inotify/FSEvents
 - **BREAKS cloud mounts**: S3 FUSE, Azure Files, etc. may not emit events
 - **BREAKS certain containerized scenarios**: Docker volume mounts may not propagate events
@@ -68,7 +74,8 @@ Should we evolve from time-based polling to event-driven file detection, while m
 ### Option 3: Hybrid Strategy (Event-Driven with Polling Fallback) ✅
 
 **Architecture:**
-```
+
+```text
 ┌─────────────────────────────────────┐
 │ File Detection Strategy (per route) │
 └─────────────────────────────────────┘
@@ -106,6 +113,7 @@ Should we evolve from time-based polling to event-driven file detection, while m
    - Best reliability with good performance
 
 **Pros:**
+
 - **Performance**: Event-driven by default for modern systems
 - **Compatibility**: Polling fallback for network/cloud file systems
 - **Flexibility**: Per-route configuration (some routes event, some poll)
@@ -114,6 +122,7 @@ Should we evolve from time-based polling to event-driven file detection, while m
 - **Backward Compatible**: Existing configs work unchanged (default to event)
 
 **Cons:**
+
 - More complex implementation
 - Two code paths to maintain
 - Need to handle fsnotify errors gracefully
@@ -136,6 +145,7 @@ The hybrid approach provides the best balance:
 ### Configuration Design
 
 **routes.json (Multi-Ingress Mode):**
+
 ```json
 {
   "routes": [
@@ -153,6 +163,7 @@ The hybrid approach provides the best balance:
 ```
 
 **Environment Variables (Legacy Mode):**
+
 ```bash
 # WATCH_MODE: event, poll, or hybrid
 WATCH_MODE=event
@@ -161,6 +172,7 @@ HYBRID_POLL_INTERVAL_SECONDS=60
 ```
 
 **Default Behavior:**
+
 - **watchMode**: `"event"` (with automatic fallback to polling if fsnotify fails)
 - **pollInterval**: `5s` (used in poll mode or event fallback)
 - **hybridPollInterval**: `60s` (used only in hybrid mode for backup polling)
@@ -168,22 +180,26 @@ HYBRID_POLL_INTERVAL_SECONDS=60
 ### Implementation Strategy
 
 **Phase 1: Core Event Monitor** ✅
+
 - Add `fsnotify` dependency
 - Create `internal/monitor/event_monitor.go` with fsnotify integration
 - Refactor `internal/monitor/monitor.go` to support strategy pattern
 - Add automatic fallback logic (event → poll if fsnotify fails)
 
 **Phase 2: Configuration** ✅
+
 - Add `WatchMode`, `PollInterval`, `HybridPollInterval` to routes.go InputConfig
 - Update config.go for legacy mode watch mode settings
 - Add validation for watch mode values
 
 **Phase 3: Integration** ✅
+
 - Update main.go to instantiate correct monitor based on watchMode
 - Update README.md with watch mode documentation
 - Update routes.json.example with watch mode examples
 
 **Phase 4: Testing** ✅
+
 - Unit tests for event monitor
 - Integration tests for all three modes
 - Verify fallback behavior when fsnotify unavailable
@@ -209,31 +225,35 @@ HYBRID_POLL_INTERVAL_SECONDS=60
 ### Mitigation
 
 **Complexity Management:**
+
 - Strategy pattern keeps code paths separate and testable
 - Clear abstraction layer in Monitor interface
 - Comprehensive unit tests for each mode
 
 **Dependency Risk:**
+
 - fsnotify is mature, widely-used, well-maintained
 - Pure Go implementation (no CGO dependencies)
 - Fallback to polling if library unavailable/broken
 
 **OS Limits (Linux inotify):**
+
 - Document inotify limits in README (default 8192 watches)
 - Provide instructions for increasing: `fs.inotify.max_user_watches`
 - Automatic fallback to polling if watch limit exceeded
 
 **Event Reliability:**
+
 - Hybrid mode catches missed events via periodic polling
 - File readiness check still applies (2-second stability check)
 - Graceful error handling with logging
 
 ## References
 
-- **fsnotify Library**: https://github.com/fsnotify/fsnotify
-- **Linux inotify**: https://man7.org/linux/man-pages/man7/inotify.7.html
-- **macOS FSEvents**: https://developer.apple.com/documentation/coreservices/file_system_events
-- **Windows ReadDirectoryChangesW**: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-readdirectorychangesw
+- **fsnotify Library**: <https://github.com/fsnotify/fsnotify>
+- **Linux inotify**: <https://man7.org/linux/man-pages/man7/inotify.7.html>
+- **macOS FSEvents**: <https://developer.apple.com/documentation/coreservices/file_system_events>
+- **Windows ReadDirectoryChangesW**: <https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-readdirectorychangesw>
 - **ADR-004**: Multi-Ingress Routing Architecture
 
 ## Revision History

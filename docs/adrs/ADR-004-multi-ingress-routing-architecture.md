@@ -11,6 +11,7 @@
 The initial design assumed **one service instance = one input folder = one output destination**. This creates operational complexity when handling multiple data sources:
 
 **Current Pain Points:**
+
 - Need separate service instances for products, orders, accounts, etc.
 - Each instance is near-identical (duplicate Docker containers, configs, monitoring)
 - Adding new input types requires deploying new service instances
@@ -33,6 +34,7 @@ Should we evolve from "one service per input" to "one service handling N routes"
 ### Option 1: Keep Current Single-Input Design
 
 **Architecture:**
+
 ```
 Service Instance A → products/ → products_queue
 Service Instance B → orders/ → orders_queue  
@@ -40,12 +42,14 @@ Service Instance C → accounts/ → accounts_queue
 ```
 
 **Pros:**
+
 - Simple per-instance configuration
 - Complete isolation between inputs
 - Easy to reason about individual service behavior
 - No shared state or route coordination
 
 **Cons:**
+
 - Operational overhead: N inputs = N service instances
 - Configuration duplication (same code, different env vars)
 - Resource waste (each instance needs CPU/memory allocation)
@@ -55,6 +59,7 @@ Service Instance C → accounts/ → accounts_queue
 ### Option 2: Multi-Ingress Router (Configuration-Driven)
 
 **Architecture:**
+
 ```
 Single Service Instance
 ├─ Route: products
@@ -75,6 +80,7 @@ Single Service Instance
 ```
 
 **Configuration via `routes.json`:**
+
 ```json
 {
   "routes": [
@@ -126,6 +132,7 @@ Single Service Instance
 ```
 
 **Pros:**
+
 - **One binary, many behaviors**: Single codebase handles all routes
 - **Config-only additions**: New input = edit routes.json, restart service
 - **Load partitioning when needed**: Run multiple instances with route subsets
@@ -135,6 +142,7 @@ Single Service Instance
 - **Operational sanity**: One thing to monitor, one thing to debug
 
 **Cons:**
+
 - **Shared failure domain**: Bug affects all routes (mitigated by restart/rollback)
 - **Config restart required**: Adding routes needs service restart (acceptable trade-off)
 - **More complex configuration**: routes.json vs simple env vars
@@ -145,10 +153,12 @@ Single Service Instance
 Run multiple instances, each handling a subset of routes (e.g., Instance A handles products + orders, Instance B handles accounts + payments).
 
 **Pros:**
+
 - Some consolidation without full shared failure domain
 - Can partition by criticality or load characteristics
 
 **Cons:**
+
 - Still operational complexity (which routes on which instance?)
 - Configuration coordination challenges
 - Worst of both worlds: complexity without full benefit
@@ -169,6 +179,7 @@ This service is **configuration-driven plumbing**. It routes files from source f
 ### Core Principle: The Service Knows Routes, Not Domains
 
 The service does NOT know what "products" or "orders" mean. It knows:
+
 - **Route Name**: Arbitrary identifier (could be "route_a", "ingestion_17")
 - **Input Path**: Where to poll
 - **Filters**: What to process
@@ -183,11 +194,13 @@ Domain semantics (what products ARE) belong in downstream consumers, not the ing
 ### Phase 1: Configuration Schema
 
 **Environment Variable:**
+
 ```bash
 ROUTES_CONFIG=/etc/csv2json/routes.json
 ```
 
 **routes.json Schema:**
+
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -250,6 +263,7 @@ ROUTES_CONFIG=/etc/csv2json/routes.json
 ### Phase 2: Output Envelope Specification
 
 **Queue Output with Route Context:**
+
 ```json
 {
   "route": {
@@ -268,6 +282,7 @@ ROUTES_CONFIG=/etc/csv2json/routes.json
 ```
 
 **Key Fields:**
+
 - **route.name**: Which route processed this file (enables downstream routing)
 - **route.source**: Full source file path for audit trail
 - **sourceFile**: Filename only (for compatibility with ADR-003)
@@ -279,6 +294,7 @@ File output remains as pure JSON array per ADR-003. Route context is NOT embedde
 ### Phase 3: Service Behavior
 
 **Startup:**
+
 1. Load `routes.json` from `ROUTES_CONFIG` path
 2. Validate schema and required paths exist
 3. Initialize one poller per route (independent goroutines)
@@ -286,6 +302,7 @@ File output remains as pure JSON array per ADR-003. Route context is NOT embedde
 
 **Per-Route Processing:**
 Each route operates independently:
+
 - Polls its input folder
 - Applies its filters
 - Parses with its semantics
@@ -293,11 +310,13 @@ Each route operates independently:
 - Archives to its paths
 
 **Error Isolation:**
+
 - One route's failure does NOT stop other routes
 - Failed routes log errors but keep retrying
 - Structured logs include route name for filtering
 
 **Configuration Reload:**
+
 - ❌ Hot reload NOT supported in v1 (adds complexity)
 - ✅ Requires service restart to pick up route changes
 - Future: Consider SIGHUP handler for zero-downtime reload
@@ -305,6 +324,7 @@ Each route operates independently:
 ### Phase 4: Operational Considerations
 
 **Single Instance (Default):**
+
 ```yaml
 # docker-compose.yml
 services:
@@ -318,6 +338,7 @@ services:
 ```
 
 **Partitioned Instances (High Load):**
+
 ```yaml
 # docker-compose.yml
 services:
@@ -338,6 +359,7 @@ services:
 
 **Monitoring:**
 Structured logs include route name:
+
 ```json
 {
   "level": "INFO",
@@ -407,6 +429,7 @@ This design establishes a **pattern** for all future ingestion services:
 ```
 
 **Contract:**
+
 - **route.name**: Always present, identifies which route processed this
 - **route.source**: Full source path for audit
 - **timestamp**: Always ISO8601 UTC
@@ -436,6 +459,7 @@ Future ingestion services (JSON ingestion, XML ingestion, Parquet ingestion) wil
 ### Migration Path from ADR-003
 
 ADR-003 principles remain valid **per-route**:
+
 - Each route still follows three-step pipeline (poll, convert, archive)
 - Each route still has one outcome (processed, ignored, failed)
 - Each route still enforces CSV validation per its parsing config
