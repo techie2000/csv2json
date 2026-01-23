@@ -23,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-01-22
 
 ### Added
-- **Multi-Ingress Routing (ADR-004)**: Service now supports monitoring multiple input folders, each with distinct output destinations and queue routing configurations via `routes.json`
-- **Hybrid File Detection Strategy (ADR-005)**: Event-driven file monitoring using OS-level notifications (fsnotify) for near-instant file detection (<100ms latency)
+- **Multi-Ingress Routing ([ADR-004](docs/adrs/ADR-004-multi-ingress-routing-architecture.md))**: Service now supports monitoring multiple input folders, each with distinct output destinations and queue routing configurations via `routes.json`
+- **Hybrid File Detection Strategy ([ADR-005](docs/adrs/ADR-005-hybrid-file-detection-strategy.md))**: Event-driven file monitoring using OS-level notifications (fsnotify) for near-instant file detection (<100ms latency)
   - Three watch modes: `event` (default, OS notifications), `poll` (legacy polling), `hybrid` (event + backup polling)
   - Automatic fallback to polling if event monitoring unavailable
   - Configurable via `WATCH_MODE` environment variable or `watchMode` in routes.json

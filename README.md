@@ -17,7 +17,7 @@ A high-performance, production-ready file polling service written in **Go** that
 
 - **Two Operational Modes**:
   - **Legacy Mode**: Single input folder → single output destination
-  - **Multi-Ingress Routing Mode**: Multiple input folders → multiple output destinations (ADR-004)
+  - **Multi-Ingress Routing Mode**: Multiple input folders → multiple output destinations ([ADR-004](docs/adrs/ADR-004-multi-ingress-routing-architecture.md))
 - **Continuous File Monitoring**: Polls specified directories for new files
 - **Flexible Format Support**: Handles CSV and other delimited formats (TSV, pipe-delimited, etc.)
 - **Content Validation**: Validates file content regardless of file extension
@@ -45,18 +45,21 @@ flowchart TD
     F -->|Parse Error| D2
     F -->|Success| G[JSON Conversion]
     G --> H{Output Type?}
-    H -->|File| I[Write JSON File]
-    H -->|Queue| J[Send to Queue]
-    I --> K[Archive: Processed]
-    J --> K
+    H -->|file| I[Write JSON File]
+    H -->|queue| J[Send to Queue]
+    H -->|both| K1[Write JSON File]
+    K1 --> K2[Send to Queue]
+    I --> L[Archive: Processed]
+    J --> L
+    K2 --> L
     
     style A fill:#4a9eff,stroke:#333,stroke-width:2px,color:#000
-    style K fill:#5cb85c,stroke:#333,stroke-width:2px,color:#fff
+    style L fill:#5cb85c,stroke:#333,stroke-width:2px,color:#fff
     style D1 fill:#f0ad4e,stroke:#333,stroke-width:2px,color:#000
     style D2 fill:#d9534f,stroke:#333,stroke-width:2px,color:#fff
 ```
 
-### Multi-Ingress Routing Mode (ADR-004)
+### Multi-Ingress Routing Mode ([ADR-004](docs/adrs/ADR-004-multi-ingress-routing-architecture.md))
 
 ```mermaid
 flowchart TB
@@ -119,13 +122,13 @@ All configuration is managed through environment variables. The service supports
 |---------------------------------|-------------------------------------------------------------------|------------------|
 | `INPUT_FOLDER`                  | Directory to monitor for incoming files                           | `./input`        |
 | `WATCH_MODE`                    | File detection strategy: `event`, `poll`, or `hybrid` (see below) | `event`          |
-| `POLL_INTERVAL_SECONDS`         | Seconds between folder polls (poll/hybrid modes)                  | `5`              |
-| `HYBRID_POLL_INTERVAL_SECONDS`  | Backup polling interval for hybrid mode                           | `60`             |
-| `MAX_FILES_PER_POLL`            | Maximum files to process per poll cycle (0 = no limit)            | `50`             |
+| `POLL_INTERVAL_SECONDS`         | Polling interval for poll mode (primary detection method)         | `5`              |
+| `HYBRID_POLL_INTERVAL_SECONDS`  | Backup polling interval for hybrid mode (events are primary)      | `60`             |
+| `MAX_FILES_PER_POLL`            | Maximum files to process per poll cycle (0 = unlimited)           | `0`              |
 | `FILE_SUFFIX_FILTER`            | Comma-separated file suffixes to process (e.g., `.csv,.txt`)      | `*` (all files)  |
 | `FILENAME_PATTERN`              | Regex pattern for filename matching                               | `.*` (all files) |
 
-#### Watch Modes (ADR-005)
+#### Watch Modes ([ADR-005](docs/adrs/ADR-005-hybrid-file-detection-strategy.md))
 
 **Event Mode** (default, recommended):
 
@@ -143,10 +146,11 @@ All configuration is managed through environment variables. The service supports
 
 **Hybrid Mode** (maximum reliability):
 
-- Primary: Event-driven monitoring
+- Primary: Event-driven monitoring (instant)
 - Backup: Periodic polling (default 60s)
 - Best for critical systems requiring redundancy
 - Catches events that fsnotify might miss
+- Uses POLL_INTERVAL_SECONDS for poll mode, HYBRID_POLL_INTERVAL_SECONDS for hybrid backup
 
 **Linux inotify Limits**: If monitoring many routes, you may need to increase system limits:
 
@@ -225,7 +229,7 @@ Jane,25,designer
 | `LOG_FILE`           | Log file path                                                                    | `./logs/csv2json.log`    |
 | `LOG_QUEUE_MESSAGES` | Log full message content when sending to queue (for visibility, queue mode only) | `false`                  |
 
-## Multi-Ingress Routing Mode (ADR-004)
+## Multi-Ingress Routing Mode ([ADR-004](docs/adrs/ADR-004-multi-ingress-routing-architecture.md))
 
 For handling multiple input sources with different destinations, use **Multi-Ingress Routing Mode**:
 
@@ -247,8 +251,8 @@ export ROUTES_CONFIG=./routes.json
       "input": {
         "path": "./data/input/products",
         "filenamePattern": "products_.*\\.csv",
-        "pollIntervalSeconds": 10,
-        "maxFilesPerPoll": 5
+        "pollIntervalSeconds": 5,
+        "maxFilesPerPoll": 0
       },
       "parsing": {
         "hasHeader": true,
@@ -277,7 +281,7 @@ export ROUTES_CONFIG=./routes.json
 |-------|----------|-------------|
 | `name` | ✅ | Unique route identifier |
 | `input.path` | ✅ | Directory to monitor |
-| `input.watchMode` | ❌ | File detection: `event`, `poll`, or `hybrid` (default: `event`, see ADR-005) |
+| `input.watchMode` | ❌ | File detection: `event`, `poll`, or `hybrid` (default: `event`, see [ADR-005](docs/adrs/ADR-005-hybrid-file-detection-strategy.md)) |
 | `input.pollIntervalSeconds` | ❌ | Polling interval for poll/hybrid modes (default: 5) |
 | `input.hybridPollIntervalSeconds` | ❌ | Backup polling interval for hybrid mode (default: 60) |
 | `input.filenamePattern` | ❌ | Regex pattern for filename filtering |
