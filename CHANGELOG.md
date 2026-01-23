@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-23
+
 ### Added
+- **Message Envelope with Provenance Metadata ([ADR-006](docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md))**: Queue messages now include comprehensive metadata envelope preventing "context amnesia" in distributed systems
+  - **Ingestion Contract**: Schema/version identifier (e.g., `products.csv.v1`) enables contract-based routing instead of payload shape inference
+  - **Source Provenance**: Full audit trail including source file path, queue name, broker URI, and route name
+  - **Ingestion Metadata**: Service name, semantic version (read from VERSION file), and ISO8601 timestamp
+  - Downstream services can branch on `meta.ingestionContract` instead of guessing intent from payload structure
+  - Eliminates fragile patterns like regex'ing filenames or "this queue usually means X" logic
+  - Supports safe schema evolution and multiple contract versions coexisting
 - **Automated Release System**: GitHub Actions workflow for automated releases on version tags
   - Automatic binary builds for 5 platforms (linux-amd64, linux-arm64, windows-amd64, darwin-amd64, darwin-arm64)
   - SHA256 checksum generation for all binaries
@@ -19,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Installation documentation now prioritizes pre-built binaries over building from source
 - Added comprehensive Docker image usage instructions with ghcr.io registry
+- Service version now read dynamically from VERSION file instead of hardcoded constant
+  - Fallback version changed from hardcoded "0.2.0" to "unknown" to prevent maintenance trap
+  - All version-related functions now use dynamic VERSION file reading
+  - If VERSION file missing, service reports version as "unknown" instead of stale hardcoded value
+- Queue message format changed to include full metadata envelope (see ADR-006)
+  - **BREAKING CHANGE**: Queue message structure changed from simple `{"identifier": "...", "data": [...]}` to `{"meta": {...}, "data": [...]}`
+  - Downstream consumers must update to parse new envelope structure
+  - Route configuration now requires `ingestionContract` field
+  - Configuration field renamed: `includeRouteContext` → `includeEnvelope`
 
 ## [0.2.0] - 2026-01-22
 
@@ -112,9 +130,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **v0.3.0** (2026-01-23): Message envelope with provenance metadata (ADR-006), Dynamic VERSION reading
 - **v0.2.0** (2026-01-22): Major features: Multi-ingress routing, Event-driven monitoring
 - **v0.1.0** (2026-01-21): Initial release
 
-[Unreleased]: https://github.com/techie2000/csv2json/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/techie2000/csv2json/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/techie2000/csv2json/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/techie2000/csv2json/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/techie2000/csv2json/releases/tag/v0.1.0

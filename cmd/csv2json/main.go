@@ -167,13 +167,13 @@ func runMultiIngressMode(routesConfigPath string) {
 			log.Fatalf("Failed to initialize processor for route '%s': %v", route.Name, err)
 		}
 
-		// Set route context if using queue output
-		if route.Output.Type == "queue" {
-			includeContext := true // Default
-			if route.Output.IncludeRouteContext != nil {
-				includeContext = *route.Output.IncludeRouteContext
+		// Set envelope context for queue output (ADR-006)
+		if route.Output.Type == "queue" || route.Output.Type == "both" {
+			includeEnvelope := true // Default
+			if route.Output.IncludeEnvelope != nil {
+				includeEnvelope = *route.Output.IncludeEnvelope
 			}
-			proc.SetRouteName(route.Name, includeContext)
+			proc.SetEnvelopeContext(route.Name, route.IngestionContract, includeEnvelope)
 		}
 
 		processors = append(processors, proc)

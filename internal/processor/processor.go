@@ -13,12 +13,13 @@ import (
 )
 
 type Processor struct {
-	config    *config.Config
-	parser    *parser.Parser
-	archiver  *archiver.Archiver
-	output    output.Handler
-	monitor   monitor.FileMonitor // Changed from *monitor.Monitor to interface
-	routeName string              // Optional route name for multi-ingress mode
+	config            *config.Config
+	parser            *parser.Parser
+	archiver          *archiver.Archiver
+	output            output.Handler
+	monitor           monitor.FileMonitor // Changed from *monitor.Monitor to interface
+	routeName         string              // Optional route name for multi-ingress mode
+	ingestionContract string              // Schema/contract identifier (ADR-006)
 }
 
 func New(cfg *config.Config) (*Processor, error) {
@@ -60,21 +61,26 @@ func New(cfg *config.Config) (*Processor, error) {
 	}
 
 	return &Processor{
-		config:    cfg,
-		parser:    p,
-		archiver:  arch,
-		output:    out,
-		monitor:   mon,
-		routeName: "", // Empty for legacy mode
+		config:            cfg,
+		parser:            p,
+		archiver:          arch,
+		output:            out,
+		monitor:           mon,
+		routeName:         "", // Empty for legacy mode
+		ingestionContract: "", // Empty for legacy mode
 	}, nil
 }
 
-// SetRouteName configures route context for multi-ingress mode
-func (p *Processor) SetRouteName(name string, includeInOutput bool) {
-	p.routeName = name
-	// If output is a queue handler, enable route context
+// SetEnvelopeContext configures message envelope metadata for multi-ingress mode (ADR-006)
+func (p *Processor) SetEnvelopeContext(routeName, ingestionContract string, includeEnvelope bool) {
+	p.routeName = routeName
+	p.ingestionContract = ingestionContract
+	// If output is a queue handler, configure envelope context
 	if qh, ok := p.output.(*output.QueueHandler); ok {
-		qh.SetRouteContext(name, includeInOutput)
+		qh.SetEnvelopeContext(routeName, ingestionContract, "", includeEnvelope) // sourceFilePath set per file
+	} else if bh, ok := p.output.(*output.BothHandler); ok {
+		// For BothHandler, configure the queue handler inside it
+		bh.SetEnvelopeContext(routeName, ingestionContract, "", includeEnvelope)
 	}
 }
 
@@ -92,6 +98,13 @@ func (p *Processor) Stop() {
 func (p *Processor) processFile(filePath string) error {
 	filename := filepath.Base(filePath)
 	log.Printf("Processing file: %s", filename)
+
+	// Update source file path in queue handler for envelope metadata
+	if qh, ok := p.output.(*output.QueueHandler); ok {
+		qh.SetEnvelopeContext(p.routeName, p.ingestionContract, filePath, true)
+	} else if bh, ok := p.output.(*output.BothHandler); ok {
+		bh.SetEnvelopeContext(p.routeName, p.ingestionContract, filePath, true)
+	}
 
 	// Check if file should be processed based on filters
 	if !p.config.ShouldProcessFile(filename) {

@@ -2,6 +2,7 @@
   "routes": [
     {
       "name": "products",
+      "ingestionContract": "products.csv.v1",
       "input": {
         "path": "./data/input/products",
         "filenamePattern": "products_.*\\.csv",
@@ -17,7 +18,8 @@
       },
       "output": {
         "type": "queue",
-        "destination": "products_queue"
+        "destination": "products_queue",
+        "includeEnvelope": true
       },
       "archive": {
         "processedPath": "./data/archive/products/processed",
@@ -27,6 +29,7 @@
     },
     {
       "name": "orders",
+      "ingestionContract": "orders.csv.v1",
       "input": {
         "path": "./data/input/orders",
         "filenamePattern": "orders_.*\\.csv",
@@ -40,7 +43,8 @@
       },
       "output": {
         "type": "queue",
-        "destination": "orders_queue"
+        "destination": "orders_queue",
+        "includeEnvelope": true
       },
       "archive": {
         "processedPath": "./data/archive/orders/processed",
@@ -49,6 +53,7 @@
     },
     {
       "name": "accounts",
+      "ingestionContract": "accounts.delimited.v1",
       "input": {
         "path": "./data/input/accounts",
         "suffixFilter": ".csv",

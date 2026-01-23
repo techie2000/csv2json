@@ -248,6 +248,7 @@ export ROUTES_CONFIG=./routes.json
   "routes": [
     {
       "name": "products",
+      "ingestionContract": "products.csv.v1",
       "input": {
         "path": "./data/input/products",
         "filenamePattern": "products_.*\\.csv",
@@ -263,7 +264,7 @@ export ROUTES_CONFIG=./routes.json
       "output": {
         "type": "queue",
         "destination": "products_queue",
-        "includeRouteContext": true
+        "includeEnvelope": true
       },
       "archive": {
         "processedPath": "./data/archive/products/processed",
@@ -280,6 +281,7 @@ export ROUTES_CONFIG=./routes.json
 | Field | Required | Description |
 |-------|----------|-------------|
 | `name` | ✅ | Unique route identifier |
+| `ingestionContract` | ✅ | Schema/contract identifier (e.g., `products.csv.v1`) - see [ADR-006](docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) |
 | `input.path` | ✅ | Directory to monitor |
 | `input.watchMode` | ❌ | File detection: `event`, `poll`, or `hybrid` (default: `event`, see [ADR-005](docs/adrs/ADR-005-hybrid-file-detection-strategy.md)) |
 | `input.pollIntervalSeconds` | ❌ | Polling interval for poll/hybrid modes (default: 5) |
@@ -293,25 +295,79 @@ export ROUTES_CONFIG=./routes.json
 | `parsing.encoding` | ❌ | File encoding (default: `utf-8`) |
 | `output.type` | ✅ | `file` or `queue` |
 | `output.destination` | ✅ | Queue name or file output folder |
-| `output.includeRouteContext` | ❌ | Add route metadata to queue messages (default: true for queue, ignored for file) |
+| `output.includeEnvelope` | ❌ | Add full message envelope with provenance metadata (default: true for queue, ignored for file) |
 | `archive.processedPath` | ✅ | Archive location for successful files |
 | `archive.failedPath` | ✅ | Archive location for failed files |
 | `archive.ignoredPath` | ❌ | Archive location for ignored files |
 
-### Queue Message Format with Route Context
+### Queue Message Format with Provenance Envelope ([ADR-006](docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md))
 
-When `includeRouteContext: true`, queue messages include source routing metadata:
+When `includeEnvelope: true` (default), queue messages include a comprehensive metadata envelope with full provenance tracking:
 
 ```json
 {
-  "route": {
-    "name": "products",
-    "source": "/data/input/products/products_20260122_103045.csv"
+  "meta": {
+    "ingestionContract": "products.csv.v1",
+    "source": {
+      "type": "file",
+      "name": "products_20260122_103045.csv",
+      "path": "/data/input/products/products_20260122_103045.csv",
+      "queue": "products_queue",
+      "broker": "rabbitmq://localhost:5672",
+      "route": "products"
+    },
+    "ingestion": {
+      "service": "csv2json",
+      "version": "0.2.0",
+      "timestamp": "2026-01-22T10:30:45Z"
+    }
   },
-  "identifier": "products_20260122_103045.csv",
   "data": [
     {"sku": "ABC123", "name": "Widget", "price": "29.99"}
   ]
+}
+```
+
+**Message Envelope Benefits:**
+
+- 🎯 **Contract-Based Routing**: Downstream services branch on `meta.ingestionContract`, not payload shape
+- 📍 **Full Provenance**: Track message from source file → route → queue → broker
+- 🕐 **Audit Trail**: Service version + timestamp enable time-travel debugging
+- 🔄 **Safe Evolution**: Queue names can change, contracts remain stable
+- 🚫 **No Guessing**: Services declare "I accept products.csv.v1" not "I accept whatever comes from that queue today"
+- 📊 **Schema Registries**: Enable centralized contract management and versioned validation
+
+**Envelope Fields:**
+
+| Field | Description |
+|-------|-------------|
+| `meta.ingestionContract` | Schema/contract identifier (e.g., `products.csv.v1`) |
+| `meta.source.type` | Source type: `file`, `api`, `stream` |
+| `meta.source.name` | Original source filename |
+| `meta.source.path` | Full source file path |
+| `meta.source.queue` | Queue name (provenance metadata) |
+| `meta.source.broker` | Broker URI (e.g., `rabbitmq://localhost:5672`) |
+| `meta.source.route` | Route name from configuration |
+| `meta.ingestion.service` | Service name (`csv2json`) |
+| `meta.ingestion.version` | Service semantic version |
+| `meta.ingestion.timestamp` | ISO8601 ingestion timestamp (UTC) |
+
+**Downstream Service Pattern:**
+
+```go
+// ✅ GOOD: Explicit contract checking
+switch msg.Meta.IngestionContract {
+case "products.csv.v1":
+    processProductsV1(msg.Data)
+case "products.csv.v2":
+    processProductsV2(msg.Data)
+default:
+    return ErrUnknownContract
+}
+
+// ❌ BAD: Inferring intent from payload structure
+if hasField(msg, "sku") && hasField(msg, "price") {
+    // Medieval astrology: divining meaning from structure
 }
 ```
 
@@ -319,9 +375,10 @@ When `includeRouteContext: true`, queue messages include source routing metadata
 
 ✅ **One service handles multiple data sources**  
 ✅ **Config-only additions** - no code deployment needed  
-✅ **Route context enables downstream routing decisions**  
+✅ **Contract-based routing** - downstream services branch on declared contracts, not payload shapes  
 ✅ **Operational simplicity** - single binary, fewer moving parts  
 ✅ **Partitionable** - split routes across instances when needed  
+✅ **Full provenance** - track every message from source file through queue to consumer  
 
 ### Example: Three Routes in One Service
 
@@ -330,16 +387,19 @@ When `includeRouteContext: true`, queue messages include source routing metadata
   "routes": [
     {
       "name": "products",
+      "ingestionContract": "products.csv.v1",
       "input": {"path": "./input/products"},
       "output": {"type": "queue", "destination": "products_queue"}
     },
     {
       "name": "orders",
+      "ingestionContract": "orders.csv.v1",
       "input": {"path": "./input/orders"},
       "output": {"type": "queue", "destination": "orders_queue"}
     },
     {
       "name": "accounts",
+      "ingestionContract": "accounts.csv.v1",
       "input": {"path": "./input/accounts"},
       "output": {"type": "file", "destination": "./output/accounts"}
     }
@@ -397,7 +457,7 @@ sha256sum -c csv2json-linux-amd64.sha256
 docker pull ghcr.io/techie2000/csv2json:latest
 
 # Or use a specific version
-docker pull ghcr.io/techie2000/csv2json:v0.2.0
+docker pull ghcr.io/techie2000/csv2json:v0.3.0
 
 # Run with Docker
 docker run -v ./data/input:/app/input -v ./data/output:/app/output ghcr.io/techie2000/csv2json:latest
@@ -569,51 +629,51 @@ docker run -d --name rabbitmq \
 csv2json/
 ├── cmd/
 │   └── csv2json/
-│       └── main.go          # Service entry point
+│       └── main.go             # Service entry point
 ├── internal/
 │   ├── archiver/
-│   │   ├── archiver.go      # File archiving
+│   │   ├── archiver.go         # File archiving
 │   │   └── archiver_test.go
 │   ├── config/
-│   │   ├── config.go        # Configuration management
+│   │   ├── config.go           # Configuration management
 │   │   └── config_test.go
 │   ├── converter/
-│   │   ├── converter.go     # JSON conversion
+│   │   ├── converter.go        # JSON conversion
 │   │   └── converter_test.go
 │   ├── monitor/
-│   │   ├── event_monitor.go # fsnotify-based monitoring
-│   │   ├── polling_monitor.go # Time-based polling
-│   │   ├── hybrid_monitor.go # Event + polling backup
+│   │   ├── event_monitor.go    # fsnotify-based monitoring
+│   │   ├── polling_monitor.go  # Time-based polling
+│   │   ├── hybrid_monitor.go   # Event + polling backup
 │   │   └── *_test.go
 │   ├── output/
-│   │   ├── file_handler.go  # File output
-│   │   ├── queue_handler.go # RabbitMQ output
-│   │   ├── output.go        # Handler factory & BothHandler
+│   │   ├── file_handler.go     # File output
+│   │   ├── queue_handler.go    # RabbitMQ output
+│   │   ├── output.go           # Handler factory & BothHandler
 │   │   └── *_test.go
 │   ├── parser/
-│   │   ├── parser.go        # CSV/delimited file parser
+│   │   ├── parser.go           # CSV/delimited file parser
 │   │   └── parser_test.go
 │   └── processor/
-│       └── processor.go     # Main processing orchestration
+│       └── processor.go        # Main processing orchestration
 ├── data/
-│   ├── input/               # File drop location
-│   ├── output/              # JSON output files
+│   ├── input/                  # File drop location
+│   ├── output/                 # JSON output files
 │   ├── archive/
 │   │   ├── processed/
 │   │   ├── ignored/
 │   │   └── failed/
 │   └── logs/
 ├── docs/
-│   ├── adrs/                # Architecture Decision Records
+│   ├── adrs/                   # Architecture Decision Records
 │   └── SECURITY.md
-├── testdata/                # Test fixtures
-├── .env.example             # Example environment configuration
-├── go.mod                   # Go module dependencies
-├── go.sum                   # Dependency checksums
-├── Dockerfile               # Container definition
-├── docker-compose.yml       # Multi-container setup
-├── Makefile                 # Build automation
-└── README.md                # This file
+├── testdata/                   # Test fixtures
+├── .env.example                # Example environment configuration
+├── go.mod                      # Go module dependencies
+├── go.sum                      # Dependency checksums
+├── Dockerfile                  # Container definition
+├── docker-compose.yml          # Multi-container setup
+├── Makefile                    # Build automation
+└── README.md                   # This file
 ```
 
 ## Error Handling
@@ -714,11 +774,12 @@ For security policies, vulnerability reporting, and security scanning informatio
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes, features, and fixes for each version.
 
-**Latest Release:** v0.2.0 (2026-01-22)
+**Latest Release:** v0.3.0 (2026-01-23)
 
-- Multi-ingress routing architecture
-- Event-driven file detection (<100ms latency)
-- Comprehensive CLI documentation
+- Message envelope with provenance metadata (ADR-006)
+- Contract-based routing for downstream services
+- Dynamic VERSION file reading
+- Integration tests with RabbitMQ
 
 ## License
 

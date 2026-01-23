@@ -11,11 +11,12 @@ import (
 
 // Route represents a single ingestion route configuration
 type Route struct {
-	Name    string        `json:"name"`
-	Input   InputConfig   `json:"input"`
-	Parsing ParsingConfig `json:"parsing"`
-	Output  OutputConfig  `json:"output"`
-	Archive ArchiveConfig `json:"archive"`
+	Name              string        `json:"name"`
+	IngestionContract string        `json:"ingestionContract"` // Schema/contract identifier (e.g., products.csv.v1)
+	Input             InputConfig   `json:"input"`
+	Parsing           ParsingConfig `json:"parsing"`
+	Output            OutputConfig  `json:"output"`
+	Archive           ArchiveConfig `json:"archive"`
 }
 
 // InputConfig defines input folder and filtering
@@ -41,9 +42,9 @@ type ParsingConfig struct {
 
 // OutputConfig defines destination and type
 type OutputConfig struct {
-	Type                string `json:"type"` // "file" or "queue"
-	Destination         string `json:"destination"`
-	IncludeRouteContext *bool  `json:"includeRouteContext,omitempty"` // Pointer to distinguish between unset and false
+	Type            string `json:"type"` // "file" or "queue"
+	Destination     string `json:"destination"`
+	IncludeEnvelope *bool  `json:"includeEnvelope,omitempty"` // Include full message envelope with provenance (ADR-006)
 }
 
 // ArchiveConfig defines archive paths
@@ -84,6 +85,9 @@ func LoadRoutes(configPath string) (*RoutesConfig, error) {
 		if route.Name == "" {
 			return nil, fmt.Errorf("route at index %d missing required field 'name'", i)
 		}
+		if route.IngestionContract == "" {
+			return nil, fmt.Errorf("route '%s': missing required field 'ingestionContract' (e.g., products.csv.v1)", route.Name)
+		}
 		if route.Input.Path == "" {
 			return nil, fmt.Errorf("route '%s': missing required field 'input.path'", route.Name)
 		}
@@ -118,10 +122,10 @@ func LoadRoutes(configPath string) (*RoutesConfig, error) {
 		if route.Parsing.Encoding == "" {
 			route.Parsing.Encoding = "utf-8"
 		}
-		// Default includeRouteContext to true for queue output (nil = not explicitly set)
-		if route.Output.Type == "queue" && route.Output.IncludeRouteContext == nil {
+		// Default includeEnvelope to true for queue output (nil = not explicitly set)
+		if route.Output.Type == "queue" && route.Output.IncludeEnvelope == nil {
 			defaultTrue := true
-			route.Output.IncludeRouteContext = &defaultTrue
+			route.Output.IncludeEnvelope = &defaultTrue
 		}
 
 		// Compile filename pattern if specified

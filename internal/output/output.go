@@ -82,6 +82,13 @@ func (h *BothHandler) Close() error {
 	return h.queueHandler.Close()
 }
 
+// SetEnvelopeContext configures envelope metadata for the queue handler (ADR-006)
+func (h *BothHandler) SetEnvelopeContext(routeName, ingestionContract, sourceFilePath string, includeEnvelope bool) {
+	if qh, ok := h.queueHandler.(*QueueHandler); ok {
+		qh.SetEnvelopeContext(routeName, ingestionContract, sourceFilePath, includeEnvelope)
+	}
+}
+
 func marshalMessage(data []map[string]string, identifier string) ([]byte, error) {
 	msg := Message{
 		Identifier: identifier,
