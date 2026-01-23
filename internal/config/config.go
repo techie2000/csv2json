@@ -132,13 +132,13 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) validate() error {
-	if c.OutputType != "file" && c.OutputType != "queue" {
-		return fmt.Errorf("OUTPUT_TYPE must be 'file' or 'queue', got: %s", c.OutputType)
+	if c.OutputType != "file" && c.OutputType != "queue" && c.OutputType != "both" {
+		return fmt.Errorf("OUTPUT_TYPE must be 'file', 'queue', or 'both', got: %s", c.OutputType)
 	}
 
-	if c.OutputType == "queue" {
+	if c.OutputType == "queue" || c.OutputType == "both" {
 		if c.QueueType == "" || c.QueueHost == "" || c.QueueName == "" {
-			return fmt.Errorf("QUEUE_TYPE, QUEUE_HOST, and QUEUE_NAME must be set when OUTPUT_TYPE=queue")
+			return fmt.Errorf("QUEUE_TYPE, QUEUE_HOST, and QUEUE_NAME must be set when OUTPUT_TYPE=queue or both")
 		}
 		if c.QueuePort < 1 || c.QueuePort > 65535 {
 			return fmt.Errorf("QUEUE_PORT must be between 1 and 65535, got: %d", c.QueuePort)

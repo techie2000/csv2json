@@ -23,9 +23,63 @@ func CreateHandler(outputType, outputFolder, queueType, queueHost string, queueP
 		return NewFileHandler(outputFolder), nil
 	case "queue":
 		return NewQueueHandler(queueType, queueHost, queuePort, queueName, queueUsername, queuePassword, logMessages)
+	case "both":
+		fileHandler := NewFileHandler(outputFolder)
+		queueHandler, err := NewQueueHandler(queueType, queueHost, queuePort, queueName, queueUsername, queuePassword, logMessages)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create queue handler: %w", err)
+		}
+		return NewBothHandler(fileHandler, queueHandler), nil
 	default:
-		return nil, fmt.Errorf("invalid output type: %s", outputType)
+		return nil, fmt.Errorf("invalid output type: %s (valid: file, queue, both)", outputType)
 	}
+}
+
+// BothHandler sends output to both file and queue
+type BothHandler struct {
+	fileHandler  Handler
+	queueHandler Handler
+}
+
+func NewBothHandler(fileHandler, queueHandler Handler) *BothHandler {
+	return &BothHandler{
+		fileHandler:  fileHandler,
+		queueHandler: queueHandler,
+	}
+}
+
+func (h *BothHandler) Send(data []map[string]string, identifier string) error {
+	// Write to file first (creates archive/audit trail)
+	if err := h.fileHandler.Send(data, identifier); err != nil {
+		return fmt.Errorf("file output failed: %w", err)
+	}
+
+	// Then send to queue (if file succeeds, we have archive)
+	if err := h.queueHandler.Send(data, identifier); err != nil {
+		return fmt.Errorf("queue output failed: %w", err)
+	}
+
+	return nil
+}
+
+func (h *BothHandler) SendOrdered(result *parser.ParseResult, identifier string) error {
+	// Write to file first
+	if err := h.fileHandler.SendOrdered(result, identifier); err != nil {
+		return fmt.Errorf("file output failed: %w", err)
+	}
+
+	// Then send to queue
+	if err := h.queueHandler.SendOrdered(result, identifier); err != nil {
+		return fmt.Errorf("queue output failed: %w", err)
+	}
+
+	return nil
+}
+
+func (h *BothHandler) Close() error {
+	// Close both handlers (ignore file handler close errors as it's a no-op)
+	h.fileHandler.Close()
+	return h.queueHandler.Close()
 }
 
 func marshalMessage(data []map[string]string, identifier string) ([]byte, error) {

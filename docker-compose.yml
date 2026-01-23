@@ -26,7 +26,7 @@ services:
       - LOG_LEVEL=INFO
       - LOG_FILE=/app/logs/csv2json.log
       - LOG_QUEUE_MESSAGES=true
-      - OUTPUT_TYPE=queue
+      - OUTPUT_TYPE=both
       - QUEUE_TYPE=rabbitmq
       - QUEUE_HOST=rabbitmq
       - QUEUE_PORT=5672

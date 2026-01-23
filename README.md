@@ -191,16 +191,22 @@ Jane,25,designer
 
 | Variable         | Description                                                                           | Default     |
 |------------------|---------------------------------------------------------------------------------------|-------------|
-| `OUTPUT_TYPE`    | Output destination: `file` or `queue`                                                 | `file`      |
-| `OUTPUT_FOLDER`  | Directory for JSON output files (when OUTPUT_TYPE=file)                               | `./output`  |
-| `QUEUE_TYPE`     | Queue system: `rabbitmq`, `kafka`, `sqs`, `azure-servicebus` (when OUTPUT_TYPE=queue) | `rabbitmq`  |
-| `QUEUE_HOST`     | Queue server hostname (when OUTPUT_TYPE=queue)                                        | `localhost` |
-| `QUEUE_PORT`     | Queue server port (when OUTPUT_TYPE=queue)                                            | `5672`      |
-| `QUEUE_NAME`     | Queue name (when OUTPUT_TYPE=queue)                                                   | -           |
+| `OUTPUT_TYPE`    | Output destination: `file`, `queue`, or `both` (write files AND send to queue)       | `file`      |
+| `OUTPUT_FOLDER`  | Directory for JSON output files (when OUTPUT_TYPE=file or both)                       | `./output`  |
+| `QUEUE_TYPE`     | Queue system: `rabbitmq`, `kafka`, `sqs`, `azure-servicebus` (when OUTPUT_TYPE=queue or both) | `rabbitmq`  |
+| `QUEUE_HOST`     | Queue server hostname (when OUTPUT_TYPE=queue or both)                                | `localhost` |
+| `QUEUE_PORT`     | Queue server port (when OUTPUT_TYPE=queue or both)                                    | `5672`      |
+| `QUEUE_NAME`     | Queue name (when OUTPUT_TYPE=queue or both)                                           | -           |
 | `QUEUE_USERNAME` | Queue authentication username                                                         | -           |
 | `QUEUE_PASSWORD` | Queue authentication password                                                         | -           |
 
 **Note**: Currently only `rabbitmq` is implemented. Other queue types (`kafka`, `sqs`, `azure-servicebus`) are stubbed for future implementation.
+
+**OUTPUT_TYPE=both Benefits**:
+- 📁 **Archive**: JSON files written to OUTPUT_FOLDER serve as permanent audit trail
+- 👁️ **Visibility**: Non-privileged users can see processed data without queue access
+- 🔄 **Durability**: Messages persist in files even after consumed from queue
+- 🐛 **Debugging**: Easy comparison between file output and queue messages
 
 ### Archive Settings
 
@@ -519,6 +525,26 @@ QUEUE_NAME=json_output
 QUEUE_USERNAME=user
 QUEUE_PASSWORD=secret
 ```
+
+### Example 4: Both File and Queue Output (Recommended for Production)
+
+```bash
+OUTPUT_TYPE=both
+OUTPUT_FOLDER=./output
+QUEUE_TYPE=rabbitmq
+QUEUE_HOST=rabbitmq.example.com
+QUEUE_PORT=5672
+QUEUE_NAME=json_output
+QUEUE_USERNAME=user
+QUEUE_PASSWORD=secret
+LOG_QUEUE_MESSAGES=true
+```
+
+**Benefits of OUTPUT_TYPE=both**:
+- JSON files persist in `./output` as audit trail after queue consumption
+- Non-privileged team members can review processed data without queue access
+- Easy debugging by comparing file content vs. queue message
+- Archival compliance without additional consumer logic
 
 **RabbitMQ Setup with Docker:**
 
