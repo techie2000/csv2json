@@ -49,7 +49,8 @@ The repository uses automated security scanning via GitHub Actions:
 
 ### Issue Creation
 
-When critical or high severity vulnerabilities are detected with available fixes, the workflow automatically creates GitHub issues with:
+When critical or high severity vulnerabilities are detected with available fixes,
+the workflow automatically creates GitHub issues with:
 
 - **Title:** `[Security] Upgrade [package] from [current] to [fixed]`
 - **Labels:** `security-critical` or `security-high`, `security`, `dependencies`

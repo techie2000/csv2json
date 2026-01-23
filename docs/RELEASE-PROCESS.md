@@ -4,7 +4,7 @@ This document provides a quick reference for creating releases. For detailed ins
 
 ## Automated Release Process
 
-**✨ Just push a tag - everything else is automatic! ✨**
+### ✨ Just push a tag - everything else is automatic! ✨
 
 ```bash
 # 1. Update CHANGELOG.md (move [Unreleased] items to new version section)

@@ -7,7 +7,9 @@
 
 ## Context and Problem Statement
 
-We need to build a file polling service that runs continuously (24/7) to monitor directories, parse CSV/delimited files, convert them to JSON, and output to files or message queues. The service must be reliable, performant, and easy to deploy in production environments.
+We need to build a file polling service that runs continuously (24/7) to monitor directories, parse CSV/delimited
+files, convert them to JSON, and output to files or message queues. The service must be reliable, performant, and
+easy to deploy in production environments.
 
 Two primary language options were considered: **Python** and **Go**.
 
@@ -105,7 +107,8 @@ Since this service will run **continuously in production (24/7)**, Go is the cle
 
 ### Trade-offs Accepted
 
-- **Development Time:** Go may take slightly longer to write initially, but the production benefits far outweigh this one-time cost
+- **Development Time:** Go may take slightly longer to write initially, but the production benefits far outweigh
+  this one-time cost
 - **Team Familiarity:** Team must learn Go if unfamiliar, but Go's simplicity makes this investment worthwhile
 - **Rapid Changes:** For this use case (stable file processing service), we don't need Python's rapid iteration benefits
 

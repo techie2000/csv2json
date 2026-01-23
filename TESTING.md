@@ -20,7 +20,8 @@
 
 ## Test Infrastructure
 
-This project has comprehensive test coverage validating [ADR-003](docs/adrs/ADR-003-core-system-principles.md#5-data-type-contract-strings-not-nulls) contracts:
+This project has comprehensive test coverage validating
+[ADR-003](docs/adrs/ADR-003-core-system-principles.md#5-data-type-contract-strings-not-nulls) contracts:
 
 ### Test Data (`testdata/`)
 
@@ -73,7 +74,8 @@ This project has comprehensive test coverage validating [ADR-003](docs/adrs/ADR-
 - Message marshaling to JSON format
 - Queue message structure validation
 - Identifier field validation
-- String value enforcement ([ADR-003](docs/adrs/ADR-003-core-system-principles.md#5-data-type-contract-strings-not-nulls))
+- String value enforcement
+  ([ADR-003](docs/adrs/ADR-003-core-system-principles.md#5-data-type-contract-strings-not-nulls))
 - Empty data array handling
 - Large dataset handling (1000+ records)
 - Unsupported queue type error handling

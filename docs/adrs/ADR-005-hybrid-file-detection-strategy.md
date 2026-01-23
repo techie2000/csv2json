@@ -8,7 +8,8 @@
 
 ## Context and Problem Statement
 
-The current implementation uses **time-based polling** (default 5 seconds) to detect new files. While simple and universally compatible, polling has significant drawbacks:
+The current implementation uses **time-based polling** (default 5 seconds) to detect new files. While simple and
+universally compatible, polling has significant drawbacks:
 
 **Current Pain Points:**
 
@@ -27,7 +28,8 @@ All major operating systems support **event-based file notifications**:
 Go's `fsnotify` library provides cross-platform abstraction over these mechanisms.
 
 **The Question:**
-Should we evolve from time-based polling to event-driven file detection, while maintaining compatibility with edge cases where events aren't available?
+Should we evolve from time-based polling to event-driven file detection, while maintaining compatibility with edge
+cases where events aren't available?
 
 ## Decision Drivers
 

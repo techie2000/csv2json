@@ -7,7 +7,9 @@
 
 ## Context and Problem Statement
 
-This service is **pure plumbing** - it moves data from one place to another with minimal transformation. To prevent feature creep, scope drift, and complexity explosion, we must establish **non-negotiable core principles** that define what this system is and is not.
+This service is **pure plumbing** - it moves data from one place to another with minimal transformation.
+To prevent feature creep, scope drift, and complexity explosion, we must establish **non-negotiable core principles**
+that define what this system is and is not.
 
 **What this system is:**
 
@@ -70,9 +72,10 @@ The system expects:
 - **Quote fields**: Allowed (standard CSV escaping)
 - **Empty fields**: Allowed (empty string, not null)
 
-**If row column counts don't match → FAILED, not ignored**
+#### If row column counts don't match → FAILED, not ignored
 
-**Rationale**: Auto-detecting CSV format is a trap. We are strict to prevent silent errors, misinterpretations, and debugging nightmares.
+**Rationale**: Auto-detecting CSV format is a trap. We are strict to prevent silent errors,
+misinterpretations, and debugging nightmares.
 
 ### 4. Every File Has Exactly One Outcome
 
@@ -225,16 +228,16 @@ Message 2:
 
 Users should **include datetime stamps in source filenames** to ensure uniqueness and enable processing delay tracking.
 
-**❌ BAD: Generic filenames (collision risk)**
+#### ❌ BAD: Generic filenames (collision risk)
 
-```
+```text
 orders.csv          → Overwrites on each submission
 customers.csv       → No way to track individual batches
 ```
 
-**✅ GOOD: Datetime-stamped filenames (unique, traceable)**
+#### ✅ GOOD: Datetime-stamped filenames (unique, traceable)
 
-```
+```text
 orders_20260122_103045.csv       → Unique, sortable, traceable
 customers_2026-01-22T10:30:45.csv → ISO8601 format
 sales_20260122103045_region1.csv  → Timestamp + context
@@ -253,11 +256,14 @@ sales_20260122103045_region1.csv  → Timestamp + context
 
 **Recommended Format:** `{basename}_{YYYYMMDD}_{HHMMSS}.csv`
 
-**Note:** The system adds an additional datetime suffix on archiving (e.g., `orders_20260122_103045_20260122_103145.csv`), where:
+**Note:** The system adds an additional datetime suffix on archiving
+(e.g., `orders_20260122_103045_20260122_103145.csv`), where:
+
 - First timestamp: Source generation time (user-provided)
 - Second timestamp: Processing completion time (system-generated)
 
-**If users submit with generic filenames:** Files remain processable but lose uniqueness guarantees and processing delay visibility.
+**If users submit with generic filenames:** Files remain processable but lose uniqueness guarantees and
+processing delay visibility.
 
 ### 7. Error Handling Philosophy
 
@@ -280,7 +286,8 @@ sales_20260122103045_region1.csv  → Timestamp + context
 }
 ```
 
-**Rationale:** Future-you will ask "why did this fail?" Present-you should be kind. Detailed error reports enable debugging without digging through logs.
+**Rationale:** Future-you will ask "why did this fail?" Present-you should be kind. Detailed error reports
+enable debugging without digging through logs.
 
 ### 8. Logging (Brief but Sharp)
 
@@ -298,7 +305,8 @@ sales_20260122103045_region1.csv  → Timestamp + context
 }
 ```
 
-**Rationale:** Structured logs enable querying, alerting, and dashboards. Human-readable text is for documentation, not logs.
+**Rationale:** Structured logs enable querying, alerting, and dashboards. Human-readable text is for
+documentation, not logs.
 
 ### 9. Streaming (No Monster Files in Memory)
 
@@ -379,7 +387,8 @@ This system is:
 
 - **Rigid Constraints**: Cannot handle edge cases outside these rules
 - **No Auto-Detection**: Users must configure delimiter explicitly
-- **Auto-Generated Column Names**: Files without headers get generic names (`col_0`, `col_1`, etc.) instead of meaningful field names
+- **Auto-Generated Column Names**: Files without headers get generic names (`col_0`, `col_1`, etc.)
+  instead of meaningful field names
 - **UTF-8 Only**: Requires encoding conversion for other formats
 - **Single Output Mode**: Cannot write to file AND queue simultaneously
 
@@ -388,7 +397,8 @@ This system is:
 1. **Document Constraints Clearly**: Users must understand limitations upfront
 2. **Fail Fast with Clear Errors**: Don't silently ignore problems
 3. **Provide Configuration Options**: Allow customization within boundaries (delimiter, quote char, filters)
-4. **Offer Pre-Processing Advice**: Document how to prepare files before ingestion (add meaningful headers for better JSON keys, convert encoding)
+4. **Offer Pre-Processing Advice**: Document how to prepare files before ingestion (add meaningful headers
+   for better JSON keys, convert encoding)
 5. **Monitor for Violations**: Log and alert when files fail validation
 
 ## Enforcement

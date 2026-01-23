@@ -7,7 +7,9 @@
 
 ## Context and Problem Statement
 
-In distributed systems, messages traveling through queues often lose critical context about their origin, ingestion path, and intended processing contract. This leads to "context amnesia" where downstream services must infer intent from payload structure alone—a fragile pattern prone to:
+In distributed systems, messages traveling through queues often lose critical context about their origin, ingestion
+path, and intended processing contract. This leads to "context amnesia" where downstream services must infer intent
+from payload structure alone—a fragile pattern prone to:
 
 - **Ambiguous routing**: Services guess processing logic based on payload shape
 - **Contract drift**: Queue names change but semantics remain unclear
@@ -15,7 +17,9 @@ In distributed systems, messages traveling through queues often lose critical co
 - **Brittle integrations**: Downstream services break when queue topology changes
 - **Schema confusion**: Structurally identical payloads with different meanings
 
-**Medieval Astrology Problem**: Downstream services shouldn't divine meaning from payload shapes like astrologers reading tea leaves. They should be explicitly told:
+**Medieval Astrology Problem**: Downstream services shouldn't divine meaning from payload shapes like astrologers
+reading tea leaves. They should be explicitly told:
+
 - Where the message came from (provenance)
 - What contract it satisfies (schema/version)
 - When and how it was ingested (audit trail)
@@ -35,6 +39,7 @@ In distributed systems, messages traveling through queues often lose critical co
 ### Option 1: Minimal Context (Current)
 
 **Structure:**
+
 ```json
 {
   "route": {"name": "products", "source": "/path/to/file.csv"},
@@ -44,10 +49,12 @@ In distributed systems, messages traveling through queues often lose critical co
 ```
 
 **Pros:**
+
 - Simple to implement
 - Minimal message overhead
 
 **Cons:**
+
 - No queue name (loses provenance)
 - No contract/schema identifier
 - No service version (debugging issues)
@@ -57,6 +64,7 @@ In distributed systems, messages traveling through queues often lose critical co
 ### Option 2: Enhanced Envelope (Chosen)
 
 **Structure:**
+
 ```json
 {
   "meta": {
@@ -80,6 +88,7 @@ In distributed systems, messages traveling through queues often lose critical co
 ```
 
 **Pros:**
+
 - Full provenance chain (file → route → queue)
 - Contract-based routing (not structure inference)
 - Service version enables compatibility checks
@@ -88,20 +97,24 @@ In distributed systems, messages traveling through queues often lose critical co
 - Clean separation of concerns
 
 **Cons:**
+
 - Larger message size (~200 bytes overhead)
 - Requires code changes in producer and consumers
 
 ### Option 3: Headers-Only Metadata
 
 **Structure:**
+
 - Use AMQP message headers for metadata
 - Keep payload unchanged
 
 **Pros:**
+
 - Zero payload overhead
 - Protocol-level metadata
 
 **Cons:**
+
 - Headers lost when messages persisted to files
 - Not portable across queue systems
 - Harder to debug (invisible metadata)
@@ -113,7 +126,8 @@ In distributed systems, messages traveling through queues often lose critical co
 
 ### Rationale
 
-1. **Provenance is Essential**: Queue name is part of message meaning—two queues with identical payloads can have different semantics
+1. **Provenance is Essential**: Queue name is part of message meaning—two queues with identical payloads
+   can have different semantics
 2. **Contracts Enable Evolution**: `ingestionContract` allows schema versioning independent of infrastructure changes
 3. **Audit Trail**: Full lineage from source file → route → queue → timestamp
 4. **Debugging**: Service version + timestamp enable time-travel debugging
@@ -133,11 +147,13 @@ In distributed systems, messages traveling through queues often lose critical co
 **Recommended Pattern:** `<domain>.<entity>.<format>.<version>`
 
 Examples:
+
 - `customers.csv.v1` - Customer CSV ingestion contract v1
 - `orders.json.v2` - Orders JSON ingestion contract v2
 - `products.delimited.v1` - Products pipe-delimited contract v1
 
 **Version Evolution:**
+
 - **v1 → v2**: Breaking changes (new required fields, removed fields)
 - **v1.1**: Minor changes (new optional fields, bug fixes)
 - **v1.1.2**: Patches (no schema changes)
@@ -166,7 +182,7 @@ Examples:
 ### Message Envelope Fields
 
 | Field | Required | Description |
-|-------|----------|-------------|
+| ----- | -------- | ----------- |
 | `meta.ingestionContract` | ✅ | Schema/contract identifier (e.g., `products.csv.v1`) |
 | `meta.source.type` | ✅ | Source type: `file`, `api`, `stream` |
 | `meta.source.name` | ✅ | Original source filename |
@@ -181,6 +197,7 @@ Examples:
 ### Downstream Service Pattern
 
 **Anti-Pattern (BAD):**
+
 ```go
 // Inferring intent from structure
 if hasField(msg, "sku") && hasField(msg, "price") {
@@ -189,6 +206,7 @@ if hasField(msg, "sku") && hasField(msg, "price") {
 ```
 
 **Correct Pattern (GOOD):**
+
 ```go
 // Explicit contract checking
 switch msg.Meta.IngestionContract {
@@ -224,7 +242,7 @@ default:
 ### Mitigation
 
 1. **Message Size**: Negligible for audit/debug value (0.2KB typical overhead)
-2. **Migration**: 
+2. **Migration**:
    - Phase 1: Producer emits both old and new formats (dual-write)
    - Phase 2: Consumers migrate to new format
    - Phase 3: Remove old format support

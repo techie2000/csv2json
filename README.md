@@ -1,6 +1,7 @@
 # csv2json - CSV/Delimited File to JSON Conversion Service
 
-A high-performance, production-ready file polling service written in **Go** that monitors directories for CSV/delimited files, validates them, converts them to JSON format, and routes outputs to files or message queues.
+A high-performance, production-ready file polling service written in **Go** that monitors directories for
+CSV/delimited files, validates them, converts them to JSON format, and routes outputs to files or message queues.
 
 **Built with Go for:**
 
@@ -28,7 +29,9 @@ A high-performance, production-ready file polling service written in **Go** that
 - **Quote Handling**: Supports both quoted and unquoted field values
 - **Configuration-Driven**: Routes defined via JSON config or environment variables
 
-> **Message Queue Support:** RabbitMQ is the primary supported queue system. See [ADR-002: Why RabbitMQ](docs/adrs/ADR-002-use-rabbitmq-for-queuing.md) for the decision rationale. AWS SQS and Azure Service Bus support are planned for future releases.
+> **Message Queue Support:** RabbitMQ is the primary supported queue system. See
+> [ADR-002: Why RabbitMQ](docs/adrs/ADR-002-use-rabbitmq-for-queuing.md) for the decision rationale.
+> AWS SQS and Azure Service Bus support are planned for future releases.
 
 ## Architecture
 
@@ -107,11 +110,10 @@ All configuration is managed through environment variables. The service supports
 
 ### Mode Selection
 
-| Variable         | Description                                                              | Default |
-|------------------|--------------------------------------------------------------------------|---------|
-| `ROUTES_CONFIG`  | Path to `routes.json` for Multi-Ingress Routing Mode. If empty, runs in Legacy Single-Input Mode | -       |
+| Variable | Description | Default |
+| -------- | ----------- | ------- |
+| `ROUTES_CONFIG` | Path to `routes.json` for Multi-Ingress Routing Mode. If empty, runs in Legacy Single-Input Mode | - |
 
-**If `ROUTES_CONFIG` is set:** Service runs in **Multi-Ingress Routing Mode** (see below).  
 **If `ROUTES_CONFIG` is empty:** Service runs in **Legacy Single-Input Mode** using environment variables below.
 
 ### Legacy Single-Input Mode Configuration
@@ -193,20 +195,22 @@ Jane,25,designer
 
 ### Output Settings
 
-| Variable         | Description                                                                           | Default     |
-|------------------|---------------------------------------------------------------------------------------|-------------|
-| `OUTPUT_TYPE`    | Output destination: `file`, `queue`, or `both` (write files AND send to queue)       | `file`      |
-| `OUTPUT_FOLDER`  | Directory for JSON output files (when OUTPUT_TYPE=file or both)                       | `./output`  |
-| `QUEUE_TYPE`     | Queue system: `rabbitmq`, `kafka`, `sqs`, `azure-servicebus` (when OUTPUT_TYPE=queue or both) | `rabbitmq`  |
-| `QUEUE_HOST`     | Queue server hostname (when OUTPUT_TYPE=queue or both)                                | `localhost` |
-| `QUEUE_PORT`     | Queue server port (when OUTPUT_TYPE=queue or both)                                    | `5672`      |
-| `QUEUE_NAME`     | Queue name (when OUTPUT_TYPE=queue or both)                                           | -           |
-| `QUEUE_USERNAME` | Queue authentication username                                                         | -           |
-| `QUEUE_PASSWORD` | Queue authentication password                                                         | -           |
+| Variable | Description | Default |
+| -------- | ----------- | ------- |
+| `OUTPUT_TYPE` | Output destination: `file`, `queue`, or `both` (write files AND send to queue) | `file` |
+| `OUTPUT_FOLDER` | Directory for JSON output files (when OUTPUT_TYPE=file or both) | `./output` |
+| `QUEUE_TYPE` | Queue system: `rabbitmq`, `kafka`, `sqs`, `azure-servicebus` | `rabbitmq` |
+| `QUEUE_HOST` | Queue server hostname (when OUTPUT_TYPE=queue or both) | `localhost` |
+| `QUEUE_PORT` | Queue server port (when OUTPUT_TYPE=queue or both) | `5672` |
+| `QUEUE_NAME` | Queue name (when OUTPUT_TYPE=queue or both) | - |
+| `QUEUE_USERNAME` | Queue authentication username | - |
+| `QUEUE_PASSWORD` | Queue authentication password | - |
 
-**Note**: Currently only `rabbitmq` is implemented. Other queue types (`kafka`, `sqs`, `azure-servicebus`) are stubbed for future implementation.
+**Note**: Currently only `rabbitmq` is implemented. Other queue types (`kafka`, `sqs`, `azure-servicebus`)
+are stubbed for future implementation.
 
 **OUTPUT_TYPE=both Benefits**:
+
 - 📁 **Archive**: JSON files written to OUTPUT_FOLDER serve as permanent audit trail
 - 👁️ **Visibility**: Non-privileged users can see processed data without queue access
 - 🔄 **Durability**: Messages persist in files even after consumed from queue
@@ -279,11 +283,11 @@ export ROUTES_CONFIG=./routes.json
 ### Route Configuration Fields
 
 | Field | Required | Description |
-|-------|----------|-------------|
+| ----- | -------- | ----------- |
 | `name` | ✅ | Unique route identifier |
-| `ingestionContract` | ✅ | Schema/contract identifier (e.g., `products.csv.v1`) - see [ADR-006](docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) |
+| `ingestionContract` | ✅ | Schema identifier - see [ADR-006](docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) |
 | `input.path` | ✅ | Directory to monitor |
-| `input.watchMode` | ❌ | File detection: `event`, `poll`, or `hybrid` (default: `event`, see [ADR-005](docs/adrs/ADR-005-hybrid-file-detection-strategy.md)) |
+| `input.watchMode` | ❌ | File detection: `event`, `poll`, or `hybrid` (default: `event`) |
 | `input.pollIntervalSeconds` | ❌ | Polling interval for poll/hybrid modes (default: 5) |
 | `input.hybridPollIntervalSeconds` | ❌ | Backup polling interval for hybrid mode (default: 60) |
 | `input.filenamePattern` | ❌ | Regex pattern for filename filtering |
@@ -340,7 +344,7 @@ When `includeEnvelope: true` (default), queue messages include a comprehensive m
 **Envelope Fields:**
 
 | Field | Description |
-|-------|-------------|
+| ----- | ----------- |
 | `meta.ingestionContract` | Schema/contract identifier (e.g., `products.csv.v1`) |
 | `meta.source.type` | Source type: `file`, `api`, `stream` |
 | `meta.source.name` | Original source filename |
@@ -466,7 +470,9 @@ docker run -v ./data/input:/app/input -v ./data/output:/app/output ghcr.io/techi
 docker-compose up -d
 ```
 
-**Important for Docker/Windows users:** File system events don't propagate reliably from Windows hosts through Docker volume mounts. Set `WATCH_MODE=hybrid` in your docker-compose.yml or add `-e WATCH_MODE=hybrid` to docker run commands to enable backup polling.
+**Important for Docker/Windows users:** File system events don't propagate reliably from Windows hosts
+through Docker volume mounts. Set `WATCH_MODE=hybrid` in your docker-compose.yml or add
+`-e WATCH_MODE=hybrid` to docker run commands to enable backup polling.
 
 ### Option 3: Build from Source
 
@@ -605,6 +611,7 @@ LOG_QUEUE_MESSAGES=true
 ```
 
 **Benefits of OUTPUT_TYPE=both**:
+
 - JSON files persist in `./output` as audit trail after queue consumption
 - Non-privileged team members can review processed data without queue access
 - Easy debugging by comparing file content vs. queue message

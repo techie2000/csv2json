@@ -7,7 +7,9 @@
 
 ## Context and Problem Statement
 
-The csv2json service needs to support outputting converted JSON data to a message queue for downstream processing, in addition to file-based output. This enables asynchronous, decoupled processing and integration with event-driven architectures. The system must support a message broker that is:
+The csv2json service needs to support outputting converted JSON data to a message queue for downstream processing,
+in addition to file-based output. This enables asynchronous, decoupled processing and integration with event-driven
+architectures. The system must support a message broker that is:
 
 - Reliable and production-ready
 - Compatible with standard protocols for portability
@@ -129,11 +131,14 @@ The csv2json service needs to support outputting converted JSON data to a messag
 
 ### Rationale
 
-RabbitMQ was selected as the primary message queue implementation because it provides the **optimal balance of simplicity, portability, and reliability** for this service:
+RabbitMQ was selected as the primary message queue implementation because it provides the **optimal balance of
+simplicity, portability, and reliability** for this service:
 
-1. **Standards-Based Protocol**: AMQP ensures we're not locked to a specific vendor or platform. The same code can work with RabbitMQ, Azure Service Bus (with AMQP support), or other AMQP-compliant brokers.
+1. **Standards-Based Protocol**: AMQP ensures we're not locked to a specific vendor or platform. The same code can
+   work with RabbitMQ, Azure Service Bus (with AMQP support), or other AMQP-compliant brokers.
 
-2. **Right-Sized Solution**: Our use case involves thousands of messages per day, not millions per second. RabbitMQ handles this workload effortlessly without Kafka's operational complexity.
+2. **Right-Sized Solution**: Our use case involves thousands of messages per day, not millions per second. RabbitMQ
+   handles this workload effortlessly without Kafka's operational complexity.
 
 3. **Multi-Cloud Portability**: Can be deployed as:
    - Self-hosted Docker container (development)
@@ -141,22 +146,28 @@ RabbitMQ was selected as the primary message queue implementation because it pro
    - Managed RabbitMQ service (CloudAMQP, AWS MQ, Azure)
    - This flexibility aligns with avoiding vendor lock-in
 
-4. **Mature Go Integration**: The `streadway/amqp` library is stable, well-documented, and widely used in production Go applications.
+4. **Mature Go Integration**: The `streadway/amqp` library is stable, well-documented, and widely used in production
+   Go applications.
 
-5. **Operational Simplicity**: Compared to Kafka, RabbitMQ is significantly easier to deploy, configure, and maintain for moderate workloads.
+5. **Operational Simplicity**: Compared to Kafka, RabbitMQ is significantly easier to deploy, configure, and maintain
+   for moderate workloads.
 
 6. **Future-Proof**: If workload requirements change dramatically, we can:
    - Scale RabbitMQ horizontally with clustering
    - Migrate to cloud-managed AMQP services
-   - Eventually replace with Kafka if streaming use cases emerge (architecture already supports pluggable output handlers)
+   - Eventually replace with Kafka if streaming use cases emerge (architecture already supports pluggable output
+     handlers)
 
 ### Trade-offs Accepted
 
-1. **Operational Responsibility**: Unlike fully-managed cloud services, we take on responsibility for deployment, monitoring, and maintenance of RabbitMQ (mitigated by Docker/Kubernetes and managed hosting options).
+1. **Operational Responsibility**: Unlike fully-managed cloud services, we take on responsibility for deployment,
+   monitoring, and maintenance of RabbitMQ (mitigated by Docker/Kubernetes and managed hosting options).
 
-2. **Not Maximum Throughput**: Kafka would handle higher throughput, but this is unnecessary for current requirements (mitigated by sufficient headroom for growth).
+2. **Not Maximum Throughput**: Kafka would handle higher throughput, but this is unnecessary for current requirements
+   (mitigated by sufficient headroom for growth).
 
-3. **Self-Hosted Infrastructure**: Requires hosting infrastructure unless using managed RabbitMQ service (mitigated by containerization and cloud hosting flexibility).
+3. **Self-Hosted Infrastructure**: Requires hosting infrastructure unless using managed RabbitMQ service (mitigated by
+   containerization and cloud hosting flexibility).
 
 ## Consequences
 
@@ -172,7 +183,8 @@ RabbitMQ was selected as the primary message queue implementation because it pro
 
 ### Negative
 
-- **Infrastructure Management**: Need to deploy, monitor, and maintain RabbitMQ instances (unless using managed service)
+- **Infrastructure Management**: Need to deploy, monitor, and maintain RabbitMQ instances (unless using managed
+  service)
 - **High Availability**: Must configure clustering/mirroring for production resilience
 - **Monitoring Required**: Need to implement health checks, metrics collection, and alerting
 - **Learning Curve**: Team needs to understand RabbitMQ concepts (exchanges, queues, bindings)
@@ -181,10 +193,12 @@ RabbitMQ was selected as the primary message queue implementation because it pro
 ### Mitigation
 
 1. **Use Docker Compose for Development**: Simplifies local setup and testing
-2. **Consider Managed RabbitMQ**: CloudAMQP, AWS MQ, or Azure Service Bus (AMQP mode) for production to reduce operational burden
+2. **Consider Managed RabbitMQ**: CloudAMQP, AWS MQ, or Azure Service Bus (AMQP mode) for production to reduce
+   operational burden
 3. **Implement Health Checks**: Monitor queue depth, connection status, message rates
 4. **Document Operations**: Create runbooks for common operational tasks
-5. **Stub Cloud Queues**: Maintain stubs for AWS SQS and Azure Service Bus in code, allowing future migration if multi-queue support is needed
+5. **Stub Cloud Queues**: Maintain stubs for AWS SQS and Azure Service Bus in code, allowing future migration if
+   multi-queue support is needed
 6. **Abstract Output Interface**: Keep output handler interface generic, making broker replacement straightforward
 
 ## References

@@ -33,6 +33,7 @@ SKIP_INTEGRATION=true go test ./internal/integration -v
 The integration tests validate:
 
 #### Envelope Structure (`TestRabbitMQIntegration_EnvelopeStructure`)
+
 - **IngestionContract**: Verifies contract ID is correctly set
 - **Source Type**: Confirms source.type = "file"
 - **Source Name**: Validates filename extraction
@@ -46,6 +47,7 @@ The integration tests validate:
 - **Data Payload**: Confirms data array is correctly embedded
 
 #### Multiple Messages (`TestRabbitMQIntegration_MultipleMessages`)
+
 - Sends 3 messages with different contracts
 - Verifies each message has unique contract ID
 - Validates all messages received correctly
@@ -55,7 +57,8 @@ The integration tests validate:
 ### Authentication Error
 
 If you see:
-```
+
+```text
 Exception (403) Reason: "username or password not allowed"
 ```
 
@@ -66,16 +69,19 @@ Exception (403) Reason: "username or password not allowed"
 If tests skip with "Cannot connect to RabbitMQ":
 
 1. Verify RabbitMQ is running:
+
    ```bash
    docker ps | grep rabbitmq
    ```
 
 2. Check RabbitMQ logs:
+
    ```bash
    docker logs csv2json-rabbitmq-1
    ```
 
 3. Ensure port 5672 is accessible:
+
    ```bash
    # Windows
    Test-NetConnection localhost -Port 5672
@@ -123,6 +129,7 @@ For continuous integration pipelines:
 ## Test Data
 
 Integration tests use ephemeral test queues:
+
 - `integration-test-queue` - Envelope structure validation
 - `multi-message-test-queue` - Multiple message scenarios
 
@@ -136,7 +143,7 @@ docker compose down -v  # Remove volumes
 
 You can manually inspect queue messages using RabbitMQ Management UI:
 
-1. Access http://localhost:15672
+1. Access [http://localhost:15672](http://localhost:15672)
 2. Login with guest/guest
 3. Navigate to Queues tab
 4. Click on test queue

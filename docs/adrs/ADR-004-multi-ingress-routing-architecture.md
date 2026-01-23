@@ -8,7 +8,8 @@
 
 ## Context and Problem Statement
 
-The initial design assumed **one service instance = one input folder = one output destination**. This creates operational complexity when handling multiple data sources:
+The initial design assumed **one service instance = one input folder = one output destination**. This creates
+operational complexity when handling multiple data sources:
 
 **Current Pain Points:**
 
@@ -35,9 +36,9 @@ Should we evolve from "one service per input" to "one service handling N routes"
 
 **Architecture:**
 
-```
+```text
 Service Instance A → products/ → products_queue
-Service Instance B → orders/ → orders_queue  
+Service Instance B → orders/ → orders_queue
 Service Instance C → accounts/ → accounts_queue
 ```
 
@@ -60,7 +61,7 @@ Service Instance C → accounts/ → accounts_queue
 
 **Architecture:**
 
-```
+```text
 Single Service Instance
 ├─ Route: products
 │  ├─ Input: /data/input/products/
@@ -150,7 +151,8 @@ Single Service Instance
 
 ### Option 3: Hybrid (Service per Cluster)
 
-Run multiple instances, each handling a subset of routes (e.g., Instance A handles products + orders, Instance B handles accounts + payments).
+Run multiple instances, each handling a subset of routes (e.g., Instance A handles products + orders, Instance B
+handles accounts + payments).
 
 **Pros:**
 
@@ -165,16 +167,21 @@ Run multiple instances, each handling a subset of routes (e.g., Instance A handl
 
 ## Decision Outcome
 
-**Chosen Option: Option 2 - Multi-Ingress Router**
+### Chosen Option: Option 2 - Multi-Ingress Router
 
-This service is **configuration-driven plumbing**. It routes files from source folders to destination queues/files based on declared routes. It does not understand "products" or "orders" - it understands **route contracts**.
+This service is **configuration-driven plumbing**. It routes files from source folders to destination queues/files
+based on declared routes. It does not understand "products" or "orders" - it understands **route contracts**.
 
 ### Rationale
 
-1. **Operational Simplicity Wins**: Managing one service instance is vastly simpler than managing N near-identical instances
-2. **Evolvability**: Business needs change faster than deployment pipelines. Config-driven routing decouples business logic from infrastructure.
-3. **Scalability Path**: Start with one instance. When load demands, partition routes across instances (e.g., critical routes on dedicated instances).
-4. **Context Preservation**: Route metadata in output messages enables downstream systems to make routing decisions without hardcoding.
+1. **Operational Simplicity Wins**: Managing one service instance is vastly simpler than managing N near-identical
+   instances
+2. **Evolvability**: Business needs change faster than deployment pipelines. Config-driven routing decouples business
+   logic from infrastructure.
+3. **Scalability Path**: Start with one instance. When load demands, partition routes across instances (e.g., critical
+   routes on dedicated instances).
+4. **Context Preservation**: Route metadata in output messages enables downstream systems to make routing decisions
+   without hardcoding.
 
 ### Core Principle: The Service Knows Routes, Not Domains
 
@@ -289,7 +296,8 @@ ROUTES_CONFIG=/etc/csv2json/routes.json
 - **rowNumber, timestamp, payload**: Per ADR-003 contract
 
 **File Output (unchanged):**
-File output remains as pure JSON array per ADR-003. Route context is NOT embedded in file output (files are for data, queues are for events).
+File output remains as pure JSON array per ADR-003. Route context is NOT embedded in file output (files are for
+data, queues are for events).
 
 ### Phase 3: Service Behavior
 
@@ -431,11 +439,12 @@ This design establishes a **pattern** for all future ingestion services:
 **Contract:**
 
 - **route.name**: Always present, identifies which route processed this
-- **route.source**: Full source path for audit
+- **route.source**: Full source file path for audit trail
 - **timestamp**: Always ISO8601 UTC
 - **payload**: Route-specific data (CSV row, JSON object, XML element, etc.)
 
-Future ingestion services (JSON ingestion, XML ingestion, Parquet ingestion) will follow this envelope standard for consistency.
+Future ingestion services (JSON ingestion, XML ingestion, Parquet ingestion) will follow this envelope standard
+for consistency.
 
 ## Consequences
 
