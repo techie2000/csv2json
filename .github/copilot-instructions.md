@@ -173,6 +173,18 @@ stateDiagram-v2
 - ❌ ASCII art (hard to read and maintain)
 - ❌ External hosting (links break, requires external accounts)
 
+#### Color Scheme for Dark Mode
+
+Use medium-saturation colors that work in both light and dark modes:
+
+```yaml
+services/components: "#2C5F8D" (medium blue) with white text
+processing/intermediate: "#17A2B8" (teal) with white text
+success/output: "#28A745" (medium green) with white text
+errors/validation: "#D9534F" (medium red) with white text
+warnings/DLQ: "#F0AD4E" (medium orange) with dark text
+backgrounds: "#555" (dark gray) with white text
+
 ## Repository Structure
 
 ```
@@ -274,12 +286,12 @@ Modular domain knowledge packages that AI can load on-demand:
 
 ### Configuration Consistency (CRITICAL)
 When adding, removing, or modifying environment variables:
-1. Update [`.env.example`](../../.env.example) with the new variable and sensible default
-2. Update [`internal/config/config.go`](../../internal/config/config.go) to load and validate the variable
-3. **Update [`docker-compose.yml`](../../docker-compose.yml)** environment section to include the variable
-4. **Update [`README.md`](../../README.md)** configuration table with the new variable (Input/Parsing/Output/Archive/Logging section)
-5. **Update examples** in [README.md](../../README.md) if the variable affects usage patterns
-6. Update [ADR-003](../../docs/adrs/ADR-003-core-system-principles.md) if the change affects core behavior principles
+1. Update [`.env.example`](../.env.example) with the new variable and sensible default
+2. Update [`internal/config/config.go`](../internal/config/config.go) to load and validate the variable
+3. **Update [`docker-compose.yml`](../docker-compose.yml)** environment section to include the variable
+4. **Update [`README.md`](../README.md)** configuration table with the new variable (Input/Parsing/Output/Archive/Logging section)
+5. **Update examples** in [README.md](../README.md) if the variable affects usage patterns
+6. Update [ADR-003](../docs/adrs/ADR-003-core-system-principles.md) if the change affects core behavior principles
 
 **Common mistake**: Forgetting to sync docker-compose.yml or README.md with .env changes, causing container configuration drift and outdated documentation.
 
@@ -288,9 +300,9 @@ When adding, removing, or modifying environment variables:
 **Current State**: Module path is `csv2json` (local development)
 
 **Before pushing to GitHub for the first time:**
-1. Update [`go.mod`](../../go.mod): Change `module csv2json` to `module github.com/techie2000/csv2json`
-2. Update [`cmd/csv2json/main.go`](../../cmd/csv2json/main.go): Change `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
-3. Update [`internal/processor/processor.go`](../../internal/processor/processor.go): Change all `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
+1. Update [`go.mod`](../go.mod): Change `module csv2json` to `module github.com/techie2000/csv2json`
+2. Update [`cmd/csv2json/main.go`](../cmd/csv2json/main.go): Change `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
+3. Update [`internal/processor/processor.go`](../internal/processor/processor.go): Change all `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
 4. Run `go mod tidy` to update dependencies
 5. Run `go test ./... -v` to verify all tests still pass
 
@@ -306,7 +318,7 @@ All significant design decisions must be documented in ADR format:
 - Located in `docs/adrs/ADR-XXX-decision-title.md`
 - Follow standard ADR template (see Project Standards section)
 - Include context, options considered, decision rationale, and consequences
-- Reference ADRs in [README](../../README.md) and related documentation
+- Reference ADRs in [README](../README.md) and related documentation
 
 ### Mermaid Diagrams
 All architecture and technical diagrams must use Mermaid format:
@@ -467,7 +479,7 @@ When making significant technical decisions:
 3. **Document Options**: List all considered alternatives with pros/cons
 4. **Make Decision**: Choose option with clear rationale
 5. **Update Diagrams**: Create or update Mermaid diagrams showing the decision's impact
-6. **Link Documentation**: Reference ADR in [README](../../README.md), related docs, and code comments
+5. **Link Documentation**: Reference ADR in [README](../README.md), related docs, and code comments
 
 ## Test Maintenance Workflow (MANDATORY)
 
@@ -478,10 +490,10 @@ When modifying Go code in csv2json:
 1. **Identify Impact**: Determine which test modules are affected by the change
 2. **Update Tests**: Modify existing tests to match new behavior
 3. **Add New Tests**: Create new test cases for new functionality
-4. **Validate [ADR-003](../../docs/adrs/ADR-003-core-system-principles.md)**: Ensure tests validate ADR-003 contracts (string values, empty strings, array structure)
+4. **Validate [ADR-003](../docs/adrs/ADR-003-core-system-principles.md)**: Ensure tests validate ADR-003 contracts (string values, empty strings, array structure)
 5. **Run Tests**: Execute `go test ./... -v` to verify all tests pass
 6. **Check Coverage**: Run `go test -cover ./...` to ensure coverage is maintained (>70% per module)
-7. **Document**: Update [TESTING.md](../../TESTING.md) if new test categories are added
+7. **Document**: Update [TESTING.md](../TESTING.md) if new test categories are added
 
 **See [`.github/instructions/test-driven-maintenance.instructions.md`](instructions/test-driven-maintenance.instructions.md) for complete requirements.**
 
@@ -493,7 +505,7 @@ When modifying Go code in csv2json:
 - [ ] Consequences (positive and negative) listed
 - [ ] Mitigation strategies for negative consequences included
 - [ ] References and supporting documentation linked
-- [ ] ADR referenced in [README](../../README.md) or relevant documentation
+- [ ] ADR referenced in [README](../README.md) or relevant documentation
 - [ ] Related Mermaid diagrams created or updated
 
 ### Diagram Creation Checklist

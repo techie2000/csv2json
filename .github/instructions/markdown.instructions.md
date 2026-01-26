@@ -44,11 +44,11 @@ Follow these guidelines for formatting and structuring your markdown content:
     ❌ BAD:
     A high-performance service that monitors directories for CSV files and converts them to JSON format with routing capabilities.
     ```
-- **Links**: Use `[link text](URL)` for links. Ensure that the link text is descriptive and the URL is valid.
-- **File References**: **CRITICAL** - Always hyperlink file and document references. Use relative paths from repository root.
-  - ✅ **GOOD**: `See [ADR-006](docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) for details`
-  - ✅ **GOOD**: `Configuration in [routes.json.example](routes.json.example)`
-  - ✅ **GOOD**: `Refer to [TESTING.md](TESTING.md) for test instructions`
+- **Links**: Use `[link text](url)` for links. Ensure that the link text is descriptive and the URL is valid.
+- **File References**: **CRITICAL** - Always hyperlink file and document references. Use relative paths appropriate to file location.
+  - ✅ **GOOD**: `See [ADR-006](../../docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) for details` (from `.github/instructions/`)
+  - ✅ **GOOD**: `Configuration in [routes.json.example](../../routes.json.example)` (from `.github/instructions/`)
+  - ✅ **GOOD**: `Refer to [TESTING.md](../../TESTING.md) for test instructions` (from `.github/instructions/`)
   - ❌ **BAD**: `See ADR-006 for details` (not hyperlinked)
   - ❌ **BAD**: `Configuration in routes.json.example` (not hyperlinked)
   - This applies to: ADRs, configuration files, documentation files, source code files, test files, and any other project artifacts

@@ -178,6 +178,6 @@ Example message you should see:
 
 ## References
 
-- [ADR-006: Message Envelope and Provenance Metadata](../../docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md)
+- [ADR-006: Message Envelope and Provenance Metadata](./adrs/ADR-006-message-envelope-and-provenance-metadata.md)
 - [RabbitMQ Docker Documentation](https://hub.docker.com/_/rabbitmq)
 - [Go Testing Package](https://pkg.go.dev/testing)
