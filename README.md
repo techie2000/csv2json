@@ -730,15 +730,18 @@ go test -v ./...
 # Format code
 go fmt ./...
 
-# Lint code
-golangci-lint run
+# Run all linters (recommended)
+golangci-lint run ./...
 
-# Vet code
+# Run with auto-fix
+golangci-lint run ./... --fix
+
+# Legacy tools (golangci-lint includes these)
 go vet ./...
-
-# Static analysis
 staticcheck ./...
 ```
+
+See [docs/LINTING.md](docs/LINTING.md) for detailed linting guidelines and common issues.
 
 ### Performance Profiling
 
