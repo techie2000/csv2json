@@ -1,4 +1,4 @@
-.PHONY: help build run clean test lint lint-fast fmt deps docker-build docker-run docker-stop logs build-all cross-compile
+.PHONY: help build run clean test lint lint-fast fmt deps docker-build docker-up docker-down docker-run docker-stop logs build-all cross-compile
 
 .DEFAULT_GOAL := help
 
@@ -77,17 +77,21 @@ docker-build: ## Build Docker image
 	@echo "✅ Docker image built: csv2json:latest"
 
 # Run with Docker Compose
-docker-run: ## Run with Docker Compose
+docker-up: ## Start services with Docker Compose
 	@echo "Starting services with Docker Compose..."
 	docker-compose up -d
 	@echo "✅ Services started"
+	@echo "📊 RabbitMQ Management: http://localhost:15672 (admin/password)"
 
 # Stop Docker containers
-docker-stop: ## Stop Docker containers
+docker-down: ## Stop and remove Docker containers
 	@echo "Stopping Docker containers..."
 	docker-compose down
 	@echo "✅ Containers stopped"
+# Aliases for backward compatibility
+docker-run: docker-up ## Alias for docker-up (backward compatibility)
 
+docker-stop: docker-down ## Alias for docker-down (backward compatibility)
 # View logs
 logs: ## Tail application logs
 	@echo "Tailing logs (Ctrl+C to exit)..."
