@@ -45,11 +45,13 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=password
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      test: rabbitmq-diagnostics -q ping
       interval: 10s
       timeout: 5s
       retries: 5
@@ -63,3 +65,6 @@ services:
     # - QUEUE_NAME=json_output
     # - QUEUE_USERNAME=admin
     # - QUEUE_PASSWORD=password
+
+volumes:
+  rabbitmq_data:

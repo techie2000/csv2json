@@ -44,15 +44,15 @@ Follow these guidelines for formatting and structuring your markdown content:
     ❌ BAD:
     A high-performance service that monitors directories for CSV files and converts them to JSON format with routing capabilities.
     ```
-- **Links**: Use `[link text](url)` for links. Ensure that the link text is descriptive and the URL is valid.
+- **Links**: Use `[link text](URL)` for links (replace URL with actual path). Ensure that the link text is descriptive and the URL is valid.
 - **File References**: **CRITICAL** - Always hyperlink file and document references. Use relative paths appropriate to file location.
-  - ✅ **GOOD**: `See [ADR-006](../../docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) for details` (from `.github/instructions/`)
-  - ✅ **GOOD**: `Configuration in [routes.json.example](../../routes.json.example)` (from `.github/instructions/`)
-  - ✅ **GOOD**: `Refer to [TESTING.md](../../TESTING.md) for test instructions` (from `.github/instructions/`)
+  - ✅ **GOOD** (from `.github/instructions/`): See [ADR-006](../../docs/adrs/ADR-006-message-envelope-and-provenance-metadata.md) for details
+  - ✅ **GOOD** (from `.github/instructions/`): Configuration in [routes.json.example](../../routes.json.example)
+  - ✅ **GOOD** (from `.github/instructions/`): Refer to [TESTING.md](../../TESTING.md) for test instructions
   - ❌ **BAD**: `See ADR-006 for details` (not hyperlinked)
   - ❌ **BAD**: `Configuration in routes.json.example` (not hyperlinked)
   - This applies to: ADRs, configuration files, documentation files, source code files, test files, and any other project artifacts
-- **Images**: Use `![alt text](image URL)` for images. Include a brief description of the image in the alt text.
+- **Images**: Use `![alt text](IMAGE_URL)` for images (replace IMAGE_URL with actual path). Include a brief description of the image in the alt text.
 - **Tables**: Use `|` to create tables. Ensure that columns are properly aligned and headers are included.
 - **Whitespace**: Use blank lines to separate sections and improve readability. Avoid excessive whitespace.
 

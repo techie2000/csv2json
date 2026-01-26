@@ -301,7 +301,7 @@ When adding, removing, or modifying environment variables:
 
 **Before pushing to GitHub for the first time:**
 1. Update [`go.mod`](../go.mod): Change `module csv2json` to `module github.com/techie2000/csv2json`
-2. Update [`cmd/csv2json/main.go`](../cmd/csv2json/main.go): Change `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
+2. Update `cmd/csv2json/main.go` ([link](../cmd/csv2json/main.go)): Change `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
 3. Update [`internal/processor/processor.go`](../internal/processor/processor.go): Change all `csv2json/internal/*` imports to `github.com/techie2000/csv2json/internal/*`
 4. Run `go mod tidy` to update dependencies
 5. Run `go test ./... -v` to verify all tests still pass
@@ -495,7 +495,7 @@ When modifying Go code in csv2json:
 6. **Check Coverage**: Run `go test -cover ./...` to ensure coverage is maintained (>70% per module)
 7. **Document**: Update [TESTING.md](../TESTING.md) if new test categories are added
 
-**See [`.github/instructions/test-driven-maintenance.instructions.md`](instructions/test-driven-maintenance.instructions.md) for complete requirements.**
+**See [`.github/instructions/test-driven-maintenance.instructions.md`](./instructions/test-driven-maintenance.instructions.md) for complete requirements.**
 
 ### ADR Creation Checklist
 
