@@ -497,7 +497,15 @@ go build -o csv2json ./cmd/csv2json
 # Copy and configure environment variables
 cp .env.example .env
 # Edit .env with your configuration
+
+# Install Git hooks (recommended for contributors)
+./scripts/install-hooks.sh      # Linux/macOS
+# or
+.\scripts\install-hooks.ps1     # Windows PowerShell
 ```
+
+**Note for Contributors:** Install Git hooks to automatically run linting before commits. This ensures code quality
+standards are maintained.
 
 ## Usage
 
@@ -707,6 +715,47 @@ The service provides logging for all operations:
 ```
 
 ## Development
+
+### Setup for Contributors
+
+1. **Clone the repository**
+2. **Install dependencies:** `go mod download`
+3. **Install Git hooks (recommended):**
+
+   ```bash
+   # Linux/macOS
+   ./scripts/install-hooks.sh
+
+   # Windows PowerShell
+   .\scripts\install-hooks.ps1
+   ```
+
+   This installs a pre-commit hook that automatically runs linting before each commit.
+
+4. **Install golangci-lint (if not already installed):**
+
+   ```bash
+   go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+   ```
+
+### Makefile Targets
+
+Run `make help` to see all available targets:
+
+```bash
+make help
+```
+
+Common targets:
+
+```bash
+make build         # Build the binary
+make test          # Run all tests with race detection and coverage
+make lint          # Run linter (auto-installs if missing)
+make fmt           # Format Go code
+make clean         # Clean build artifacts
+make docker-build  # Build Docker image
+```
 
 ### Running Tests
 
