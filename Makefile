@@ -15,14 +15,16 @@ LDFLAGS := -X csv2json/internal/version.GitCommit=$(GIT_COMMIT) -X csv2json/inte
 # Build binary
 build: ## Build the binary
 	@echo "Building csv2json..."
-	go build -ldflags="$(LDFLAGS)" -o csv2json ./cmd/csv2json
-	@echo "✅ Build complete: csv2json"
+	@mkdir -p bin
+	go build -ldflags="$(LDFLAGS)" -o bin/csv2json ./cmd/csv2json
+	@echo "✅ Build complete: bin/csv2json"
 
 # Build with optimization
 build-release: ## Build optimized release binary
 	@echo "Building optimized release binary..."
-	CGO_ENABLED=0 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json ./cmd/csv2json
-	@echo "✅ Release build complete: csv2json"
+	@mkdir -p bin
+	CGO_ENABLED=0 go build -ldflags="-w -s $(LDFLAGS)" -o bin/csv2json ./cmd/csv2json
+	@echo "✅ Release build complete: bin/csv2json"
 
 # Run the application
 run: ## Run the application
@@ -32,7 +34,7 @@ run: ## Run the application
 # Clean build artifacts
 clean: ## Clean build artifacts
 	@echo "Cleaning build artifacts..."
-	rm -f csv2json csv2json-*
+	rm -rf bin/
 	go clean
 	@echo "✅ Clean complete"
 
@@ -100,14 +102,15 @@ logs: ## Tail application logs
 # Cross-compile for multiple platforms
 build-all: ## Cross-compile for all platforms
 	@echo "Cross-compiling for all platforms..."
+	@mkdir -p bin
 	@echo "  Building linux/amd64..."
-	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-linux-amd64 ./cmd/csv2json
+	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o bin/csv2json-linux-amd64 ./cmd/csv2json
 	@echo "  Building windows/amd64..."
-	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-windows-amd64.exe ./cmd/csv2json
+	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o bin/csv2json-windows-amd64.exe ./cmd/csv2json
 	@echo "  Building darwin/amd64..."
-	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-darwin-amd64 ./cmd/csv2json
+	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s $(LDFLAGS)" -o bin/csv2json-darwin-amd64 ./cmd/csv2json
 	@echo "  Building darwin/arm64..."
-	GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s $(LDFLAGS)" -o csv2json-darwin-arm64 ./cmd/csv2json
+	GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s $(LDFLAGS)" -o bin/csv2json-darwin-arm64 ./cmd/csv2json
 	@echo "✅ Cross-compilation complete"
 
 # Cross-compile target (alias)

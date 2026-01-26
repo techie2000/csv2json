@@ -31,7 +31,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags="-w -s \
     -X csv2json/internal/version.GitCommit=${GIT_COMMIT} \
     -X csv2json/internal/version.BuildDate=${BUILD_DATE}" \
-    -o csv2json ./cmd/csv2json
+    -o bin/csv2json ./cmd/csv2json
 
 # Runtime stage
 FROM alpine:3.23
@@ -39,7 +39,7 @@ FROM alpine:3.23
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /build/csv2json .
+COPY --from=builder /build/bin/csv2json .
 
 # Create necessary directories
 RUN mkdir -p /app/input /app/output /app/archive/processed /app/archive/ignored /app/archive/failed /app/logs

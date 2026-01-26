@@ -12,9 +12,7 @@
 go.work
 
 # Build output
-csv2json
-csv2json-*
-/bin/
+bin/
 /dist/
 
 # IDE
