@@ -44,6 +44,11 @@ COPY --from=builder /build/bin/csv2json .
 # Create necessary directories
 RUN mkdir -p /app/input /app/output /app/archive/processed /app/archive/ignored /app/archive/failed /app/logs
 
+# Create non-root user
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser appuser && \
+    chown -R appuser:appuser /app
+
 # Set environment variables
 ENV INPUT_FOLDER=/app/input
 ENV OUTPUT_FOLDER=/app/output
@@ -51,6 +56,9 @@ ENV ARCHIVE_PROCESSED=/app/archive/processed
 ENV ARCHIVE_IGNORED=/app/archive/ignored
 ENV ARCHIVE_FAILED=/app/archive/failed
 ENV LOG_FILE=/app/logs/csv2json.log
+
+# Switch to non-root user
+USER appuser
 
 # Run the application
 CMD ["./csv2json"]
