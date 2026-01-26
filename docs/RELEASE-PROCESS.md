@@ -1,6 +1,6 @@
 # Release Process Quick Reference
 
-This document provides a quick reference for creating releases. For detailed instructions, see [version-management.instructions.md](.github/instructions/version-management.instructions.md).
+This document provides a quick reference for creating releases. For detailed instructions, see [version-management.instructions.md](../.github/instructions/version-management.instructions.md).
 
 ## Automated Release Process
 

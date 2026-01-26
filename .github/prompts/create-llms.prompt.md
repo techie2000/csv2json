@@ -172,29 +172,29 @@ Exclude files that:
 
 ## Documentation
 
-- [Main README](README.md): Primary project documentation and getting started guide
-- [Contributing Guide](CONTRIBUTING.md): Guidelines for contributing to the project
-- [Code of Conduct](CODE_OF_CONDUCT.md): Community guidelines and expectations
+- [Main README](../../README.md): Primary project documentation and getting started guide
+- [Contributing Guide](../../CONTRIBUTING.md): Guidelines for contributing to the project
+- [Code of Conduct](../../CODE_OF_CONDUCT.md): Community guidelines and expectations
 
 ## Specifications
 
-- [Technical Specification](spec/technical-spec.md): Detailed technical requirements and constraints
-- [API Specification](spec/api-spec.md): Interface definitions and data contracts
+- [Technical Specification](../../spec/technical-spec.md): Detailed technical requirements and constraints
+- [API Specification](../../spec/api-spec.md): Interface definitions and data contracts
 
 ## Examples
 
-- [Basic Example](examples/basic-usage.md): Simple usage demonstration
-- [Advanced Example](examples/advanced-usage.md): Complex implementation patterns
+- [Basic Example](../../examples/basic-usage.md): Simple usage demonstration
+- [Advanced Example](../../examples/advanced-usage.md): Complex implementation patterns
 
 ## Configuration
 
-- [Setup Guide](docs/setup.md): Installation and configuration instructions
-- [Deployment Guide](docs/deployment.md): Production deployment guidelines
+- [Setup Guide](../../docs/setup.md): Installation and configuration instructions
+- [Deployment Guide](../../docs/deployment.md): Production deployment guidelines
 
 ## Optional
 
-- [Architecture Documentation](docs/architecture.md): Detailed system architecture
-- [Design Decisions](docs/decisions.md): Historical design decision records
+- [Architecture Documentation](../../docs/architecture.md): Detailed system architecture
+- [Design Decisions](../../docs/decisions.md): Historical design decision records
 ```
 
 ## Success Criteria
